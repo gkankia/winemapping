@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<title>Kakheti — Wine Geography of Georgia</title>
+<meta name="description" content="Mapping nine wine microzones in Kakheti, boundary by boundary.">
+
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.29.0/mapbox-gl.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght,GRAD@0,17..18,400..700,-50..200;1,17..18,400..700,-50..200&amp;family=IBM+Plex+Mono:wght@500&amp;display=swap" rel="stylesheet">
+<link href="assets/site.css?v=20260831h" rel="stylesheet">
+<link href="assets/scroll.css?v=20260831h" rel="stylesheet">
+</head>
+<body>
+
+<header class="site-head">
+  <div class="site-head-in">
+    <a class="wordmark" href="index.html"><span lang="en">Wine <span>Geography</span></span><span lang="ka">ღვინის <span>გეოგრაფია</span></span></a>
+    <nav class="site-nav">
+      <a href="index.html" data-i18n="nav.regions">Regions</a>
+      <a href="notes.html" data-i18n="nav.notes">Notes</a>
+      <a href="about.html" data-i18n="nav.about">About</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ── prose ─────────────────────────────────────────────────────────── -->
+<article>
+  <div class="prose lede">
+    <figure class="figure figure--side figure--left">
+      <!-- The numbers are the plate's alpha bounding box: the file is
+           1414x2000 and the drawing fills it but for 44px of empty at the top
+           and the same at the foot. They crop that in CSS, leaving the file
+           alone. -->
+      <div class="figure-frame" style="--img-w:1414; --img-h:2000;
+                                       --art-x:0; --art-y:44;
+                                       --art-w:1414; --art-h:1912">
+        <img src="img/grape.png?v=20260831h" alt="Grapes on the vine, black and white"
+             width="1414" height="2000" loading="lazy" decoding="async">
+      </div>
+    </figure>
+    <p class="eyebrow" lang="en">Kakheti</p>
+    <p class="eyebrow" lang="ka">კახეთი</p>
+    <h1 class="title" lang="en"></h1>
+    <h1 class="title" lang="ka"></h1>
+    <p class="standfirst" lang="en">The Kakheti region is the principal viticulture and winemaking region in Georgia. 
+      The vineyards yielding the highest quality wines are located in the Alazani and Iori river basins, 
+      at an altitude of 400–700 meters above sea level, on humus-carbonate, chernozem, and alluvial soils. 
+      Out of the 25 registered Protected Designations of Origin (PDO) wines in Georgia, 19 are produced in Kakheti.  
+    </p>
+    <p class="standfirst" lang="ka">კახეთის მხარე საქართველოში მევენახეობა-მეღვინეობის უმთავრესი რეგიონია. 
+      საუკეთესო ხარისხის ღვინოების მომცემი ვენახები მდებარეობს ალაზნისა და ივრის აუზებში, ზღვის დონიდან 400-700 მეტრ სიმაღლეზე, 
+      ნეშომპალა-კარბონატულ, შავმიწა და ალუვიურ ნიადაგებზე. 
+      საქართველოში დარეგისტრირებული 25 ადგილწარმოშობის ღვინიდან 19 კახეთში იწარმოება.</p>
+    <p class="byline" lang="ka">რთველი 2026</p>
+    <p class="byline" lang="en">rtveli 2026</p>
+
+    <p>ქვემოთ მოცემულ რუკაზე წარმოდგიდენთ კახეთის რეგიონის ადგილწარმოშობის არეალებს, სადაც მოყვანილი ყურძნის მოსავლით
+      მზადდება ადგილობრივი ღვინო.
+    </p>
+
+    <p><span class="todo">A paragraph on where the boundaries come from: who drew
+      them, from what instrument, and how much they should be trusted. See the
+      note on provenance in About.</span></p>
+  </div>
+
+  <!-- ── the interactive piece ───────────────────────────────────────── -->
+  <section class="scrollytelling" aria-label="Microzone map">
+    <div id="stage">
+      <div id="map"></div>
+      <div class="plate" id="plateA"></div>
+      <div class="plate" id="plateB"></div>
+      <div id="zone-label" aria-hidden="true"></div>
+      <div id="parcel-tip" role="tooltip" hidden></div>
+      <img id="stage-logo" src="img/zaxis-logo-white.svg?v=20260831h" alt="Z.axis" width="64" height="40">
+      <div id="inset"></div>
+    </div>
+    <div id="story"></div>
+  </section>
+
+  <!-- ── prose, after the map lets go ────────────────────────────────── -->
+  <div class="prose closing">
+    <h2 lang="en">What the map is doing</h2>
+    <h2 lang="ka">რას აკეთებს რუკა</h2>
+
+    <p>The base is Mapbox satellite imagery with its saturation pulled to
+      &minus;1 — a true desaturation rather than a grey wash over the top, so
+      the field patterns and the terrain stay legible everywhere. Each zone's
+      colour arrives as a separate image, cut to the shape of its own boundary.</p>
+
+    <p>Inside that patch — and only there — the imagery is blended with the
+      Soviet 1:50&nbsp;000 topographic sheets, surveyed between 1973 and 1990 and
+      served as WMS by the National Agency of Public Registry. They are half a
+      century older than the imagery, which is the point: the sheets record the
+      contours, tracks and settlement blocks as they stood before the vineyards
+      were replanted, and reading them against present-day imagery is how you see
+      what changed. Outside the boundary the sheets are absent, so the black and
+      white stays clean.</p>
+
+    <p>The two are composited in the same canvas, which is why they can be mixed
+      at all: the sheet is requested for exactly the patch's extent, in the
+      patch's own projection, at the patch's own pixel size, so it lands on the
+      imagery without a resampling step. They are combined with a multiply blend,
+      which lets the satellite show through the sheet's paper white and darkens
+      only where there is linework.</p>
+
+    <p>That cut is the one interesting problem here. Mapbox GL JS cannot clip a
+      raster layer to a polygon — there is no client-side knockout for imagery —
+      so the usual answer is an inverse mask: a polygon of the whole region with
+      your boundary punched out of it, drawn opaque over the imagery. That works,
+      but it can only ever <em>hide</em>; it cannot make the inside of the shape
+      look different from the outside.</p>
+
+    <p>So the cut happens in pixels instead. Each zone's bounding box is
+      requested from the Static Images API, drawn into a canvas, and masked with
+      its own boundary path using a blurred drop shadow as the alpha channel. The
+      result goes back to the map as a geo-referenced <code>image</code> source,
+      which Mapbox reprojects and scales like any other raster. The blur straddles
+      the boundary, which is why the colour fades out instead of ending.</p>
+
+    <h2 lang="en">Sources</h2>
+    <h2 lang="ka">წყაროები</h2>
+    <ul>
+      <li>Boundaries — <span class="todo">provenance, licence, date</span></li>
+      <li>Imagery — Mapbox Satellite (Maxar, Landsat, Sentinel-2 mosaic)</li>
+      <li>Vineyard parcels — NAPR vineyard cadastre 2025, fetched live from the
+        MEPA GIS server</li>
+      <li>Historical topography — Soviet 1:50&nbsp;000 sheets, 1973&ndash;1990,
+        served as WMS by the National Agency of Public Registry
+        (<a href="https://nsdi.gov.ge/ka/geoportal">NSDI geoportal</a>)</li>
+      <li>Terrain — Mapbox Terrain-DEM v1</li>
+      <li>Photographs — <span class="todo">credit</span></li>
+    </ul>
+
+    <p class="note">The nine boundary files live in <code>zones/</code>. Three are
+      wired into the piece so far; the manifest in <code>assets/zones.js</code> is
+      the only file to edit when adding the rest.</p>
+  </div>
+</article>
+
+<footer class="site-foot">
+  <div class="site-foot-in">
+    <span>Wine Geography of Georgia</span>
+    <a href="notes.html" data-i18n="nav.notes">Notes</a>
+    <a href="about.html" data-i18n="nav.about">About</a>
+    <span class="spacer">Giorgi Kankia · 2026</span>
+  </div>
+</footer>
+
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.29.0/mapbox-gl.js"></script>
+<script src="https://unpkg.com/scrollama"></script>
+<script src="assets/i18n.js?v=20260831h"></script>
+<script src="assets/zones.js?v=20260831h"></script>
+<script src="assets/scroll.js?v=20260831h"></script>
+</body>
+</html>

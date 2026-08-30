@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<title>About — Nine Microzones</title>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght,GRAD@0,17..18,400..700,-50..200;1,17..18,400..700,-50..200&amp;family=IBM+Plex+Mono:wght@500&amp;display=swap" rel="stylesheet">
+<link href="assets/site.css?v=20260831h" rel="stylesheet">
+</head>
+<body>
+
+<header class="site-head">
+  <div class="site-head-in">
+    <a class="wordmark" href="index.html"><span lang="en">Wine <span>Geography</span></span><span lang="ka">ღვინის <span>გეოგრაფია</span></span></a>
+    <nav class="site-nav">
+      <a href="index.html" data-i18n="nav.regions">Regions</a>
+      <a href="notes.html" data-i18n="nav.notes">Notes</a>
+      <a href="about.html" aria-current="page" data-i18n="nav.about">About</a>
+    </nav>
+  </div>
+</header>
+
+<article class="prose lede">
+  <p class="eyebrow" lang="en">About</p>
+  <p class="eyebrow" lang="ka">პროექტის შესახებ</p>
+  <h1 class="title" lang="en">Method, data, colophon</h1>
+  <h1 class="title" lang="ka">მეთოდი, მონაცემები, კოლოფონი</h1>
+  <p class="standfirst" lang="en">What is in the files, where it came from, and what the
+    map does and does not claim.</p>
+  <p class="standfirst" lang="ka">რა არის ფაილებში, საიდან მოვიდა, და რას ამბობს
+    რუკა და რას — არა.</p>
+    <p class="lang-pending" lang="ka">ამ გვერდის ძირითადი ტექსტი ჯერ ინგლისურადაა.
+      სათაურები და რუკის ინტერფეისი ქართულადაა; სტატიის თარგმანი მოგვიანებით
+      დაემატება.</p>
+
+  <h2 lang="en">Scope</h2>
+  <h2 lang="ka">მოცულობა</h2>
+  <p>The project holds boundaries for five regions so far — Kakheti, Kartli,
+    Imereti, Racha-Lechkhumi and Samegrelo — and covers them one page at a time.
+    The hub draws all of them wherever they fall, whether or not the region has a
+    page yet, so the map is never further ahead of the writing than the data is.</p>
+
+  <h2 lang="en">The boundaries</h2>
+  <h2 lang="ka">საზღვრები</h2>
+  <p><span class="todo">Provenance: who delineated these microzones, under what
+    instrument or regulation, at what scale, and in which year. This is the
+    paragraph a reader will judge the whole project by — it should say plainly
+    how the lines were arrived at and what their positional accuracy is.</span></p>
+
+  <p>Nine boundary files are in hand. Each is a single-part polygon in
+    WGS 84, and their sizes span more than an order of magnitude — from a zone
+    you can walk across in half an hour to one that takes in a whole valley
+    floor.</p>
+
+  <div class="table-wrap">
+    <table class="zones">
+      <thead>
+        <tr><th>Microzone</th><th>Extent, km</th><th>Vertices</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="name">ახმეტა-ახმეტის მწვანე</td>
+          <td class="num">21.6 × 22.6</td>
+          <td class="num">1,077</td>
+          <td class="num">—</td>
+        </tr>
+        <tr>
+          <td class="name">ახოები</td>
+          <td class="num">2.2 × 2.5</td>
+          <td class="num">605</td>
+          <td>in the piece</td>
+        </tr>
+        <tr>
+          <td class="name">გურჯაანი</td>
+          <td class="num">24.2 × 26.5</td>
+          <td class="num">2,490</td>
+          <td>in the piece</td>
+        </tr>
+        <tr>
+          <td class="name">კარდენახი</td>
+          <td class="num">2.9 × 3.1</td>
+          <td class="num">415</td>
+          <td>in the piece</td>
+        </tr>
+        <tr>
+          <td class="name">მაღრაანის ქისი</td>
+          <td class="num">8.0 × 8.2</td>
+          <td class="num">114</td>
+          <td class="num">—</td>
+        </tr>
+        <tr>
+          <td class="name">ნაფარეული</td>
+          <td class="num">14.9 × 10.0</td>
+          <td class="num">2,635</td>
+          <td class="num">—</td>
+        </tr>
+        <tr>
+          <td class="name">ტიბაანი</td>
+          <td class="num">7.0 × 6.7</td>
+          <td class="num">554</td>
+          <td class="num">—</td>
+        </tr>
+        <tr>
+          <td class="name">ყვარელი-ქინძმარაული</td>
+          <td class="num">43.6 × 23.3</td>
+          <td class="num">7,649</td>
+          <td class="num">—</td>
+        </tr>
+        <tr>
+          <td class="name">წარაფი</td>
+          <td class="num">3.0 × 4.7</td>
+          <td class="num">887</td>
+          <td class="num">—</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p class="note">Extents are bounding-box dimensions, not areas, measured at each
+    zone's own latitude. Vertex counts are as supplied; the piece thins them to a
+    6&nbsp;m tolerance before drawing, which removes roughly 87&nbsp;% of them
+    without a visible change to the shape.</p>
+
+  <h2 lang="en">The imagery</h2>
+  <h2 lang="ka">სატელიტური სურათები</h2>
+  <p>Mapbox Satellite, a mosaic of Maxar, Landsat and Sentinel-2 sources whose
+    capture dates vary by tile — so the vineyard patterns visible inside one zone
+    were not necessarily photographed in the same season as those in the next.
+    Anything read off the imagery about plantings should be treated as indicative,
+    not as a survey.</p>
+
+  <h2 lang="en">The topographic sheets</h2>
+  <h2 lang="ka">ტოპოგრაფიული რუკები</h2>
+  <p>Soviet military topographic mapping at 1:50&nbsp;000, surveyed 1973&ndash;1990,
+    requested from the WMS service run by the National Agency of Public Registry
+    (NAPR) and published through the
+    <a href="https://nsdi.gov.ge/ka/geoportal">NSDI geoportal</a>. Requested as
+    JPEG rather than PNG — 300&nbsp;KB against 1.1&nbsp;MB for the same frame — at
+    the cost of an alpha channel, which is not needed here because the patch mask
+    supplies transparency.</p>
+  <p>The sheets are not a map layer. They are composited into each zone's colour
+    patch, in the same canvas as the imagery, so they appear only inside the
+    boundary and fade out with it — everything outside stays plain black-and-white
+    imagery. The blend is multiply at 0.85, which keeps satellite texture visible
+    through the sheet's paper white instead of covering it.</p>
+  <p>One request per zone, for exactly the patch extent in EPSG:3857 at the
+    patch's pixel size — about 2200&nbsp;&times;&nbsp;2560, which the service
+    renders in a little over a second. Requesting it in the projection and at the
+    size the canvas is already in means no resampling of our own between sheet and
+    imagery. Survey dates are per sheet and not recorded here; treat the vintage
+    as approximate.</p>
+
+  <h2 lang="en">Parcels</h2>
+  <h2 lang="ka">ნაკვეთები</h2>
+  <p>A zone may carry a parcel layer: individual vineyard boundaries with the
+    varieties planted on them, drawn only when a reader asks for it. Nothing is
+    stored here — the parcels are fetched live from the National Agency of Public
+    Registry's vineyard cadastre for the zone's own extent, at the moment the
+    button is pressed.</p>
+  <p>Parcels are fetched for a little more than the zone — up to 1.6&nbsp;km past
+    its edge — and the neighbours are drawn dimmed, so a zone is not a lone island
+    of vineyards in an empty frame. They are excluded from every number. That
+    distinction is not cosmetic: the service answers with everything intersecting
+    a rectangle, and for ახოები the rectangle holds 752 parcels while the boundary
+    holds 528. Counting the rectangle would overstate the zone by 46&nbsp;%. Each
+    parcel is tested against the boundary itself before it reaches the totals.</p>
+
+  <p>Three things about that service shape what you see. Its query endpoint
+    returns no geometry, so identify is the geometry endpoint. It caps a response
+    at 2,000 rows and ignores paging, so a dense extent is swept by splitting it
+    into quadrants until every cell comes back under the cap — ახოები takes one
+    request and about two seconds, a 14&nbsp;km view takes seventeen and about
+    forty. And a row is not a parcel: each carries one grape variety, so rows are
+    dissolved to one feature per polygon with the varieties collected onto it.
+    Where a sweep still hits its limit the panel says so rather than presenting a
+    partial count as a total.</p>
+  <p>Colour carries the vine: white grapes gold, coloured grapes claret, and a
+    neutral for parcels the register has not yet surveyed. That is viticulture's
+    own primary split rather than an arbitrary index, and it is the one the data
+    encodes — a berry colour is derived from each variety name.</p>
+
+  <p>Two classes and not five, for a reason worth stating. A parcel map is a
+    choropleth, so any two colours can end up adjacent and every pair has to
+    separate. Holding white, black, red and pink apart fails that test: gold
+    against red separates by only 4.8&ndash;5.6 for a deuteranope and rosé against
+    claret by 11.2 even with full colour vision, against floors of 8 and 15. Red
+    and pink sit too close to both gold and claret once every pair must work.
+    Folding them in with black is not a concession — white against coloured is the
+    split winemaking itself makes, and in ახოები red is three rows out of 856. The
+    pair in use clears every check with room to spare: colour-blind separation
+    19.9 against a floor of 8, normal vision 23.2 against 15. Each class also
+    names its varieties in the table, so identity never rests on colour alone. A parcel map is a
+    choropleth, so any two colours can end up adjacent, and on that all-pairs
+    test a fourth hue collapses: yellow against orange separates by ΔE 4.8 for a
+    deuteranope and 10.6 even with full colour vision, against floors of 8 and
+    15. The three in use were validated against the dark surface at worst-pair
+    ΔE 9.4. Every colour is also named in the accompanying table, so identity
+    never rests on colour alone.</p>
+
+  <p>Within each family the vines are stepped by shade: the darkest is what the
+    family is mostly planted to, the next its runner-up, the lightest everything
+    else. Two things are shown at once and they are not the same kind of thing —
+    family is an identity, rank within a family is an order — so each takes the
+    channel that suits it, hue for one and lightness for the other. Each ramp
+    validates on its own terms against the dark surface (monotone lightness,
+    adjacent gaps over 0.06, a single hue at 5&deg; and 4&deg; of spread), and the
+    families never collide: across every gold-against-claret pair the worst
+    separation is &Delta;E 18.9 for a deuteranope and 21.2 to full colour vision.
+    So a reader who cannot tell two golds apart can still always tell gold from
+    claret, which is the distinction that carries the meaning. Three steps and no
+    more — past that the steps stop being separable and the ramp starts implying
+    a precision it does not have.</p>
+
+  <p>Two tabs colour the same parcels two ways. <em>Vine</em> is the split above.
+    <em>Planted</em> takes the year, which is a magnitude rather than an identity,
+    so it gets a sequential ramp instead: one hue, light to dark, oldest darkest —
+    never a spread of hues, which would imply categories where there is an order.
+    Blue keeps it clearly apart from the vine tab. The five breaks are cut to the
+    data rather than to round decades: Kakheti's plantings are bimodal, a Soviet
+    peak in the 1980s and a replanting boom in the 2010s with the 1990s thin
+    between them, and these breaks put each peak in its own class instead of
+    splitting one across two. The ramp is validated as ordinal against the dark
+    surface — monotone lightness, every adjacent gap over 0.06, 3&deg; of hue
+    spread, darkest step clearing the surface at 2.15:1.</p>
+
+  <p>A zone's colour arrives in two passes. The satellite frame paints first; the
+    topographic sheet is blended in when it lands, which on that host can be
+    several seconds later. It is capped at 1200&nbsp;px — a 1:50&nbsp;000 sheet
+    scanned at 300&nbsp;dpi holds about 4&nbsp;m per pixel, so asking for more
+    only makes the server upsample a scan.</p>
+
+  <p>Hovering a parcel gives its varieties with the area, planting year and
+    training of each. Inside the boundary the fills are solid with a white
+    hairline between neighbours; outside they stay a faint wash, so context never
+    competes with the subject.</p>
+
+  <h2 lang="en">Relief</h2>
+  <h2 lang="ka">რელიეფი</h2>
+  <p>Depth comes from two passes at different scales. The Studio style's own
+    shading tileset — the one the inset locator uses — reads the region: where the
+    Caucasus front gives way to the Alazani valley floor. Its tiles stop at zoom
+    11 and it is light-on-white shading built for a pale basemap, so it is faded
+    out as the camera closes in rather than shown overzoomed and fogging the
+    imagery.</p>
+  <p>Closer in, a hillshade computed from Mapbox Terrain-DEM takes over, with its
+    exaggeration ramped from 0.7 at regional zoom to 1.15 over a zone. It is drawn
+    above both the black-and-white surround and the zone's colour patch, so one
+    relief pass lights the whole frame consistently — which is what lets a slope
+    read as a slope and a terrace as a terrace.</p>
+
+  <h2 lang="en">What the map does not do</h2>
+  <h2 lang="ka">რას არ აკეთებს რუკა</h2>
+  <ul>
+    <li>Field patterns visible inside a zone are imagery, not data. Where a zone
+      has a parcel layer, the parcels are data and the imagery around them is
+      not — the two should not be read as one.</li>
+    <li>It does not distinguish planted from unplanted land inside a boundary.</li>
+    <li>It carries no elevation or aspect analysis, though the terrain is shaded.</li>
+    <li>It does not georectify anything itself. The topographic sheets are placed
+      by the WMS service; any misregistration between a sheet and the imagery is
+      upstream, and at 1:50&nbsp;000 a plotting error of half a millimetre on
+      paper is 25&nbsp;m on the ground.</li>
+  </ul>
+
+  <h2 lang="en">The look</h2>
+  <h2 lang="ka">ვიზუალური ენა</h2>
+  <p>The site is set as a page from an ampelography — the illustrated grape
+    monographs of the nineteenth century — because that is the tradition this
+    project sits in: naming vines and drawing where they grow. Warm laid paper,
+    iron-gall ink, small caps for captions, and the plates' own inks for accent:
+    the green of a leaf, the gold of the fruit, the russet of a cut cane. The
+    grain is drawn rather than photographed — a turbulence filter at 5&nbsp;%
+    opacity over a warm wash — so it costs nothing to download and tiles forever.</p>
+  <p>The change is not only cosmetic. Every colour on the map had been stepped for
+    a near-black surface; on paper the lightest gold read at 1.28:1, which is no
+    mark at all. All three ramps were re-stepped and re-validated against the
+    paper the legend is printed on.</p>
+
+  <h2 lang="en">Colophon</h2>
+  <h2 lang="ka">კოლოფონი</h2>
+  <p>Built as a static site — no build step, three stylesheets and two scripts.
+    Mapbox GL JS 3.9 for the map, Scrollama for the scroll steps, EB Garamond for
+    text and Fraunces for display. The zone manifest lives in
+    <code>assets/zones.js</code>; the machinery is in
+    <code>assets/scroll.js</code> and is not meant to be edited to add a zone.</p>
+
+  <p>Written and mapped by Giorgi Kankia, 2026.
+    <span class="todo">Contact, repository link, licence.</span></p>
+</article>
+
+<footer class="site-foot">
+  <div class="site-foot-in">
+    <span>Wine Geography of Georgia</span>
+    <a href="index.html" data-i18n="nav.regions">Regions</a>
+    <a href="notes.html" data-i18n="nav.notes">Notes</a>
+    <span class="spacer">Giorgi Kankia · 2026</span>
+  </div>
+</footer>
+<script src="assets/i18n.js?v=20260831h"></script>
+</body>
+</html>

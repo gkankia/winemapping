@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<title>What a boundary costs — Nine Microzones</title>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght,GRAD@0,17..18,400..700,-50..200;1,17..18,400..700,-50..200&amp;family=IBM+Plex+Mono:wght@500&amp;display=swap" rel="stylesheet">
+<link href="../assets/site.css?v=20260831h" rel="stylesheet">
+</head>
+<body>
+
+<header class="site-head">
+  <div class="site-head-in">
+    <a class="wordmark" href="../index.html"><span lang="en">Wine <span>Geography</span></span><span lang="ka">ღვინის <span>გეოგრაფია</span></span></a>
+    <nav class="site-nav">
+      <a href="../index.html" data-i18n="nav.regions">Regions</a>
+      <a href="../notes.html" aria-current="page" data-i18n="nav.notes">Notes</a>
+      <a href="../about.html" data-i18n="nav.about">About</a>
+    </nav>
+  </div>
+</header>
+
+<article class="prose lede">
+  <p class="eyebrow" lang="en">Build note</p>
+  <p class="eyebrow" lang="ka">ტექნიკური ჩანაწერი</p>
+  <h1 class="title" lang="en">What a boundary costs</h1>
+  <h1 class="title" lang="ka">რა ღირს საზღვარი</h1>
+    <p class="lang-pending" lang="ka">ამ გვერდის ძირითადი ტექსტი ჯერ ინგლისურადაა.
+      სათაურები და რუკის ინტერფეისი ქართულადაა; სტატიის თარგმანი მოგვიანებით
+      დაემატება.</p>
+  <p class="standfirst">The nine files carry 16,426 vertices between them. Two of
+    them account for more than half.</p>
+  <p class="byline">24 August 2026 · build note</p>
+
+  <p>Boundary files arrive at whatever precision the tool that made them
+    happened to emit. In this set the range is wide: ყვარელი-ქინძმარაული has
+    7,649 vertices, მაღრაანის ქისი has 114 — and both describe a shape that will
+    be drawn at most a few hundred pixels across.</p>
+
+  <p>Vertex count matters here more than it usually does, because the geometry
+    isn't drawn once. Every zone's colour patch is masked by walking its boundary
+    path into a canvas, and the piece re-runs that as you scroll. Simplification
+    is not an optimisation to add later; it's part of getting the interaction to
+    feel like nothing at all.</p>
+
+  <h3>Douglas-Peucker, in metres</h3>
+  <p>The tolerance wants to be in ground units, not degrees — a degree of
+    longitude at this latitude is about a quarter shorter than a degree of
+    latitude, so a tolerance expressed in degrees thins the shape unevenly along
+    its two axes. Projecting each ring to metres first, then running
+    Douglas-Peucker at a 6&nbsp;m tolerance, gives:</p>
+
+  <div class="table-wrap">
+    <table class="zones">
+      <thead><tr><th>Microzone</th><th>Before</th><th>After</th><th>Removed</th></tr></thead>
+      <tbody>
+        <tr><td class="name">ყვარელი-ქინძმარაული</td><td class="num">7,649</td><td class="num">882</td><td class="num">88.5 %</td></tr>
+        <tr><td class="name">ნაფარეული</td><td class="num">2,635</td><td class="num">312</td><td class="num">88.2 %</td></tr>
+        <tr><td class="name">გურჯაანი</td><td class="num">2,490</td><td class="num">310</td><td class="num">87.6 %</td></tr>
+        <tr><td class="name">ახმეტა-ახმეტის მწვანე</td><td class="num">1,077</td><td class="num">298</td><td class="num">72.3 %</td></tr>
+        <tr><td class="name">წარაფი</td><td class="num">887</td><td class="num">102</td><td class="num">88.5 %</td></tr>
+        <tr><td class="name">ახოები</td><td class="num">605</td><td class="num">79</td><td class="num">86.9 %</td></tr>
+        <tr><td class="name">ტიბაანი</td><td class="num">554</td><td class="num">87</td><td class="num">84.3 %</td></tr>
+        <tr><td class="name">კარდენახი</td><td class="num">415</td><td class="num">50</td><td class="num">88.0 %</td></tr>
+        <tr><td class="name">მაღრაანის ქისი</td><td class="num">114</td><td class="num">75</td><td class="num">34.2 %</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>Nearly nine tenths of the geometry goes, and nothing visible changes. Six
+    metres is under two pixels at the zoom these zones are framed at, so the
+    displacement is smaller than the line that would draw it.</p>
+
+  <p>The interesting row is the last one. მაღრაანის ქისი loses only a third of
+    its vertices, because it was digitised sparsely to begin with — its points
+    are already further apart than the tolerance. A file that resists
+    simplification is telling you it was drawn coarsely, which is worth knowing
+    before you quote a boundary to the metre.</p>
+
+  <h3>Simplify once, for everything</h3>
+  <p>The thinning runs on load, on the source geometry, before anything is
+    drawn — not per-consumer. That matters because three separate things draw
+    these shapes: the colour patch mask, the inset locator, and the story
+    panels' framing. Simplify only the mask and the shapes drift apart by a
+    pixel or two, which shows up as the inset's outline sitting slightly off its
+    own fill. One tolerance, applied once, keeps them identical.</p>
+
+  <p class="note"><code>SIMPLIFY_M</code> in <code>assets/scroll.js</code> sets
+    the tolerance; <code>0</code> disables thinning entirely if you ever need the
+    supplied geometry drawn verbatim.</p>
+</article>
+
+<footer class="site-foot">
+  <div class="site-foot-in">
+    <span>Wine Geography of Georgia</span>
+    <a href="../notes.html" data-i18n="nav.notes">All notes</a>
+    <a href="../index.html" data-i18n="nav.regions">Regions</a>
+    <span class="spacer">Giorgi Kankia · 2026</span>
+  </div>
+</footer>
+<script src="../assets/i18n.js?v=20260831h"></script>
+</body>
+</html>

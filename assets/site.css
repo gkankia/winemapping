@@ -1,0 +1,540 @@
+/* Two local faces, each with one job.
+
+   BPG Paata sets the running text: it carries the 33 letters modern Georgian
+   uses, full Latin and digits, so a line of either script holds together.
+   GL Kupiura Medium sets the zone names on the map, and nothing else.
+
+   Neither carries mtavruli. Anything set in them therefore cannot be
+   upper-cased in Georgian without dropping into a fallback face mid-word, which
+   is why the headings and captions stay on Google Sans. */
+@font-face {
+  font-family: 'BPG Paata';
+  src: url('../fonts/bpg_paata.otf') format('opentype');
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'GL Kupiura';
+  src: url('../fonts/gl-kupiura-medium.ttf') format('truetype');
+  font-weight: 500; font-style: normal; font-display: swap;
+}
+
+:root {
+  /* An ampelography plate: laid paper gone warm, iron-gall ink, and the plate's
+     own inks for accent — vine green, grape gold, the russet of a cut cane. */
+  --paper:      #f4ecd8;
+  --paper-deep: #eadfc4;   /* recessed panels, table stripes */
+  --paper-edge: #e2d5b6;   /* the darker rim of an old page */
+  --ink:        #33291f;
+  --ink-soft:   #6b5a45;
+  --rule:       rgba(51, 41, 31, .18);
+  --rule-firm:  rgba(51, 41, 31, .38);
+
+  --vine:   #5e6b2a;   /* the leaf */
+  --gold:   #a9852b;   /* the fruit */
+  --russet: #9c5426;   /* the cane */
+  --claret: #8f3f77;
+
+  --card:   #f4ecd8;   /* kept for anything still asking for a surface */
+  --dim:    var(--ink-soft);
+
+  /* The pre-script fallback for the map/photograph seam still reads these; the
+     script replaces that gradient with a path-shaped mask as soon as it runs. */
+  --mask-start: 64%;
+  --mask-end:   88%;
+
+  /* One family for the whole project, both scripts. Google Sans carries
+     Georgian as well as Latin, so a single stack serves everything except the
+     two faces the brief named for Georgian specifically. */
+  --font: 'Google Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --font-body:  'BPG Paata', var(--font);    /* running text */
+  --font-label: 'GL Kupiura', var(--font);   /* zone names on the map */
+
+  --column: 640px;
+  --wide:   1140px;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  color: var(--ink);
+  background-color: var(--paper);
+  /* The grain is drawn, not photographed: a fine turbulence field at low
+     opacity, plus a warm wash that darkens toward the edges the way a page does
+     where it has been handled. Nothing to download and it tiles forever. */
+  background-image:
+    radial-gradient(120% 80% at 50% 0%, rgba(255,252,240,.55) 0%, rgba(255,252,240,0) 60%),
+    radial-gradient(100% 120% at 100% 100%, rgba(154,126,74,.14) 0%, rgba(154,126,74,0) 55%),
+    url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23g)' opacity='0.055'/%3E%3C/svg%3E");
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.66;   /* Paata sits taller than Google Sans */
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Small caps set in the body face, letterspaced — a plate's caption, rather
+   than a monospace label. */
+/* Captions: letterspaced upper case rather than small caps. Small caps are a
+   serif's device and Google Sans has no true set — a browser would synthesise
+   them by shrinking capitals, which reads as a mistake. */
+.eyebrow, .byline, .card-meta, .site-foot-in,
+table.zones th, .parcel-summary, .tip-head, .tip-outside, .fact-label {
+  font-family: var(--font);
+  font-variant-caps: normal;
+  font-feature-settings: normal;
+  letter-spacing: .1em;
+  font-size: .74em;
+}
+
+/* Everything applyCase() raises to upper case has to be on the face that has
+   mtavruli. Kupiura does not, so anything in this list must not inherit it —
+   the list is the same one in i18n.js, and the two are meant to match. */
+h1.title, .prose h2, .prose h3, .card-title, .studio-head h1,
+.eyebrow, .byline, .card-meta, .site-nav a, .site-foot-in,
+table.zones th, .parcel-summary, .fact-label, .parcel-tab,
+.wordmark, .row label, .btn {
+  font-family: var(--font);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Georgian typography. Driven by :lang(), so a Georgian zone name inside an
+   English page still gets the right face — which matters here, because the
+   names never translate.
+   ═══════════════════════════════════════════════════════════════════════ */
+:lang(ka) {
+  /* Georgian has no italic tradition and no small caps; both are Latin habits
+     and a browser fakes them by slanting or shrinking, which reads as a fault
+     rather than a style. */
+  font-style: normal;
+  font-variant-caps: normal;
+  font-feature-settings: normal;
+}
+
+/* Upper case here means Mtavruli — the browser maps mkhedruli to U+1C90 and up.
+   Google Sans has that block; the two Georgian files in fonts/ do not, which is
+   why this only became possible once everything moved to one family. */
+h1:lang(ka), h2:lang(ka), h3:lang(ka),
+.title:lang(ka), .card-title:lang(ka), .studio-head h1:lang(ka) {
+  letter-spacing: .005em;
+  line-height: 1.2;
+}
+
+/* Captions are upper case in both scripts — one rule, so nothing is upper case
+   in Latin and lower in Georgian on the same line. Mtavruli is wider than
+   mkhedruli, so it takes back some of the Latin letterspacing. */
+.eyebrow:lang(ka), .byline:lang(ka), .card-meta:lang(ka),
+.parcel-summary:lang(ka), .site-nav a:lang(ka), .site-foot-in:lang(ka),
+table.zones th:lang(ka), .tip-head:lang(ka), .tip-outside:lang(ka),
+.fact-label:lang(ka) {
+  letter-spacing: .04em;
+  font-size: .8em;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Language switching. Both languages ship in the markup; the inactive one is
+   hidden rather than fetched, so switching costs nothing and the page works
+   before the script runs (English shows by default).
+   ═══════════════════════════════════════════════════════════════════════ */
+/* Keyed on the ABSENCE of Georgian rather than the presence of English, so a
+   page that has not run the script yet — or cannot — shows one language rather
+   than both stacked on top of each other.
+
+   Scoped to the places that actually hold translation PAIRS. Elsewhere `lang`
+   is used to pick a face, not to offer an alternative: the zone name on the map
+   is tagged so Georgian gets its own case treatment, and a variety name carries both scripts on
+   one line. An unscoped rule hid those — the zone's name vanished in Georgian,
+   and every variety lost half of itself. */
+:root:not([data-lang="ka"]) :is(.prose, .site-head, .site-foot, .studio)
+    :is(p, span, div, h1, h2, h3, li, ul, ol, table,
+        details, td, th, summary, figcaption, section, article)[lang="ka"],
+:root[data-lang="ka"] :is(.prose, .site-head, .site-foot, .studio)
+    :is(p, span, div, h1, h2, h3, li, ul, ol, table,
+        details, td, th, summary, figcaption, section, article)[lang="en"] {
+  display: none;
+}
+
+/* Untagged prose shows in both languages — which is the honest state while the
+   article itself is still only written in one. This says so, in the language
+   that is missing. */
+.lang-pending {
+  margin: 0 0 30px; padding: 12px 16px;
+  background: rgba(156,84,38,.09);
+  border-left: 2px solid var(--russet);
+  font-size: .88em; line-height: 1.55; color: var(--ink-soft);
+}
+
+.lang-switch {
+  display: inline-flex; margin-left: 18px;
+  border: 1px solid var(--rule-firm);
+  background: var(--paper);
+}
+/* Pages with no header — the full-screen map — still get a switch. */
+.lang-switch.is-floating {
+  position: fixed; top: 16px; right: 16px; z-index: 30; margin: 0;
+  box-shadow: 0 6px 18px rgba(28,20,10,.35);
+}
+.lang-switch button {
+  padding: 3px 11px 4px; cursor: pointer;
+  background: transparent; border: 0;
+  color: var(--ink-soft); font-size: 15px; line-height: 1.4;
+  font-family: var(--font);
+}
+.lang-switch button + button { border-left: 1px solid var(--rule); }
+.lang-switch button[lang="ka"] { font-family: var(--font); font-size: 14px; }
+.lang-switch button:hover { color: var(--ink); }
+.lang-switch button[aria-pressed="true"] { background: var(--russet); color: var(--paper); }
+
+/* ─── nav ───────────────────────────────────────────────────────────── */
+.site-head {
+  position: relative; z-index: 10;
+  border-bottom: 1px solid var(--rule-firm);
+}
+.site-head-in {
+  max-width: var(--wide); margin: 0 auto; padding: 20px 24px;
+  display: flex; align-items: baseline; gap: 28px; flex-wrap: wrap;
+}
+.wordmark {
+  font-family: var(--font);
+  font-size: 19px; font-weight: 800; letter-spacing: -.01em;
+  color: var(--paper); text-decoration: none;
+}
+.wordmark span { color: var(--russet); font-style: italic; }
+.site-nav { display: flex; gap: 20px; margin-left: auto; }
+.site-nav a {
+  font-size: 15px; text-transform: none;
+  color: var(--ink-soft); text-decoration: none; padding-bottom: 2px;
+  border-bottom: 1px solid transparent;
+}
+.site-nav a:hover { color: var(--ink); }
+.site-nav a[aria-current="page"] { color: var(--ink); border-bottom-color: var(--russet); }
+
+/* ─── article column ────────────────────────────────────────────────── */
+.prose { max-width: var(--column); margin: 0 auto; padding: 0 24px; }
+.prose-wide { max-width: var(--wide); margin: 0 auto; padding: 0 24px; }
+
+/* ─── figures ───────────────────────────────────────────────────────────
+   Two shapes. A plain .figure is a block in the column with its caption under
+   it. .figure--side floats out beside the text, which is how an ampelographic
+   plate belongs on a page — the drawing stands in the margin and the prose runs
+   past it, rather than interrupting the argument for a full stop. */
+
+.figure { margin: 34px 0; }
+.figure img { display: block; width: 100%; height: auto; }
+
+.figure--side {
+  --fig-w: clamp(150px, 34%, 250px);
+  /* The one knob. Positive holds the text off the plate; NEGATIVE lets the text
+     in over it, which is how a branch comes to touch a title: a float pushes
+     line boxes off its MARGIN box, so a margin narrower than the drawing lets
+     the words sit over the drawing's own edge. Since a plate's outer edge is
+     tendrils and air, what they sit over is mostly nothing.
+     Text paints above a float, so the type stays legible and the branch reads
+     as running behind it. For the branch on top instead, give the figure
+     `position: relative; z-index: 1`. */
+  --fig-gap: -70px;
+  float: right;
+  width: var(--fig-w);
+  margin: 6px 0 18px var(--fig-gap);
+  shape-outside: margin-box;
+}
+.figure--side:first-of-type { margin-top: 0; }
+
+/* Which margin the plate stands in. Right by default; --left puts it in the
+   other one, which suits a drawing whose weight hangs to that side. */
+.figure--side.figure--left {
+  float: left;
+  margin: 6px var(--fig-gap) 18px 0;
+}
+
+/* The column is 640px in a page that is often 1200 wide, so there is a margin
+   sitting empty on either side of it. A plate pulled out into that margin costs
+   the text almost none of its measure — the alternative is a 34% float that
+   leaves lines breaking every four words. Only where the margin actually
+   exists: below this the figure stays inside the column.
+
+   It is pulled out by its own width plus the gap, and no further. Pulling it
+   the full width of the margin would park it against the window edge, a long
+   way from the text it belongs to; this way it stands just clear of the column
+   whatever the window is doing. The max() is the floor: on a narrower window
+   the margin runs out first, and the pull stops there rather than pushing the
+   plate off the side of the page. */
+@media (min-width: 1080px) {
+  .figure--side {
+    margin-right: max(calc(-1 * (var(--fig-w) + var(--fig-gap))),
+                      calc((var(--column) - 100vw) / 2 + 24px));
+  }
+  .figure--side.figure--left {
+    margin-left: max(calc(-1 * (var(--fig-w) + var(--fig-gap))),
+                     calc((var(--column) - 100vw) / 2 + 24px));
+    margin-right: var(--fig-gap);
+  }
+}
+
+/* Crops a drawing's transparent margin without touching the file. Paste the
+   four numbers from the plate's alpha bounding box and the frame hugs the
+   artwork: the box takes the artwork's own aspect, and the image is scaled and
+   offset inside it so only the drawing shows. Without this a plate with half
+   its area empty renders as a small drawing floating in a large hole, and the
+   caption sits a long way below what it captions. */
+.figure-frame {
+  position: relative; overflow: hidden;
+  aspect-ratio: var(--art-w) / var(--art-h);
+}
+.figure-frame img {
+  position: absolute; max-width: none; height: auto;
+  width: calc(var(--img-w) / var(--art-w) * 100%);
+  left: calc(var(--art-x) / var(--art-w) * -100%);
+  top: calc(var(--art-y) / var(--art-h) * -100%);
+}
+
+.figcaption {
+  font-family: var(--font);
+  font-size: 13px; line-height: 1.45; letter-spacing: .04em;
+  color: var(--russet); margin-top: 10px;
+}
+.figcaption em { font-style: italic; }
+.figcaption:lang(ka) { font-size: 12.5px; letter-spacing: .01em; }
+
+/* A float has no height of its own as far as the column is concerned, so a
+   short section could let the next block ride up alongside it. */
+.prose::after { content: ''; display: block; clear: both; }
+
+@media (max-width: 700px) {
+  /* Below this the column is too narrow to run text past a drawing: 38% of it
+     is a thumbnail and the lines beside it break every three words.
+     Both selectors, because `.figure--side.figure--left` sets float and margin
+     at two classes and would otherwise outrank this however far down it sits. */
+  .figure--side,
+  .figure--side.figure--left { float: none; width: min(70%, 300px); margin: 26px auto; }
+  .figure--side .figcaption { text-align: center; }
+}
+
+.eyebrow {
+  /* Nearly the size of the title it stands over, so it reads as a second line
+     of the heading rather than as a caption. At that size the wide caption
+     tracking becomes a gap between letters instead of a texture, so it comes
+     back down as the size goes up. */
+  font-size: clamp(24px, 3.2vw, 38px); letter-spacing: .06em;
+  line-height: 1.15;
+  color: var(--russet); margin: 0 0 14px;
+}
+/* The eyebrow is the one caption sized in px rather than off its parent, so its
+   Georgian side needs a px of its own: the shared .8em rule below would size it
+   off the body and land it smaller than the Latin on the same line. Mtavruli is
+   the wider script, so it takes that back a little. */
+.eyebrow:lang(ka) { font-size: clamp(21px, 2.9vw, 34px); letter-spacing: .02em; }
+h1.title {
+  font-family: var(--font);
+  font-size: clamp(34px, 4.8vw, 58px); font-weight: 700;
+  line-height: 1.1; margin: 0 0 18px;
+  /* Upper case loses the word shapes that carry a line, so it needs air between
+     the letters and a size back off the display setting to stay readable. */
+  letter-spacing: .015em;
+}
+.standfirst {
+  font-family: var(--font);
+  font-size: clamp(18px, 2vw, 22px); font-weight: 400;
+  line-height: 1.45; color: var(--ink-soft); margin: 0 0 30px;
+}
+.byline {
+  font-size: 15px; color: var(--ink-soft); margin: 0 0 44px;
+  padding-top: 16px; border-top: 1px solid var(--rule);
+}
+.prose h2 {
+  font-family: var(--font);
+  font-size: 24px; font-weight: 700; line-height: 1.25; letter-spacing: .03em;
+  margin: 52px 0 14px;
+}
+.prose h3 {
+  font-family: var(--font);
+  font-size: 15px; font-weight: 600;
+  letter-spacing: .08em; color: var(--russet); margin: 36px 0 10px;
+}
+.prose p { margin: 0 0 20px; }
+.prose a { color: var(--ink); text-decoration-color: var(--russet); text-underline-offset: 3px; }
+.prose a:hover { color: var(--russet); }
+.prose ul, .prose ol { margin: 0 0 20px; padding-left: 22px; }
+.prose li { margin-bottom: 8px; }
+.prose code {
+  font-family: var(--font-mono); font-size: .82em;
+  background: rgba(51,41,31,.06); padding: 2px 6px; border-radius: 2px;
+}
+.prose blockquote {
+  margin: 30px 0; padding: 4px 0 4px 22px;
+  border-left: 2px solid var(--russet);
+  font-family: var(--font); font-size: 19px; color: var(--ink-soft);
+}
+.note {
+  font-size: 15px; color: var(--dim);
+  border-top: 1px solid var(--rule); padding-top: 18px; margin-top: 40px;
+}
+
+/* ─── the placeholder marker ────────────────────────────────────────── */
+/* Anything still to be written is wrapped in this, so unfinished copy is
+   impossible to mistake for finished copy when reading the page. */
+.todo {
+  background: rgba(156,84,38,.10);
+  border-left: 2px solid rgba(156,84,38,.45);
+  padding: 2px 8px; color: var(--russet);
+}
+
+/* ─── section spacing ───────────────────────────────────────────────── */
+/* The side padding has to be repeated. `.prose` sets `padding: 0 24px` and
+   these are single-class selectors too, so the shorthand wins on cascade order
+   and the column loses its gutters — invisible on a wide screen, where the
+   measure is centred with room to spare, and edge-to-edge text on a phone. */
+.lede    { padding: 74px 24px 20px; }
+.closing { padding: 80px 24px 20px; }
+
+
+/* Running text, wherever it appears. The headings and captions listed above
+   keep Google Sans, because they are upper-cased and Paata has no mtavruli. */
+.prose p, .prose li, .prose blockquote, .standfirst, .note, .lang-pending,
+.card-dek, .region-blurb, .country-note, table.zones td, .hint, #out,
+.prose h2 + p, .todo {
+  font-family: var(--font-body);
+}
+
+/* ...except the captions, which this rule was quietly overriding. `.prose p` is
+   a class AND a type, so it outranks a bare `.eyebrow` — and an eyebrow is a
+   <p>. The Latin side came out in Paata while the Georgian side looked right
+   only because Paata has no mtavruli and each raised letter dropped through to
+   Google Sans on its own. Named here, at a specificity that wins. */
+.prose .eyebrow, .prose .byline, .prose .card-meta,
+.prose .fact-label, .prose .parcel-summary {
+  font-family: var(--font);
+}
+
+/* ─── the country map on the hub ─────────────────────────────────────── */
+.country {
+  /* Wider than the prose but short of the viewport edge. Pulled out of the
+     article's column with a 50vw offset — 100vw rather than 100%, because a
+     scrollbar makes the two differ — then capped, so the map has room to
+     breathe without running into the edges of the screen. */
+  margin: 34px auto 8px;
+  width: min(100vw, 1500px);
+  margin-left: calc(50% - min(50vw, 750px));
+  padding: 0 clamp(0px, 4vw, 60px);
+  max-width: none;
+}
+/* The map is drawn, and its background is white rather than transparent — so it
+   is multiplied into the page, which drops the white away and leaves the relief
+   sitting on the paper instead of on a card. Multiply also warms the whole thing
+   toward the page, which is the right direction here.
+
+   Nothing is overlaid on it: its projection is not published, so anything placed
+   on top would be a guess. */
+.country-map {
+  display: block; width: 100%; height: auto;
+  mix-blend-mode: multiply;
+  /* The image carries a wide margin of its own; at full width that becomes a
+     lot of empty page, so the top is cropped back. The bottom is left alone —
+     the scale bar lives down there, and pulling it up ran the caption into it. */
+  margin: -4% 0 0;
+}
+.country-note {
+  margin: 6px auto 0; max-width: var(--column); padding: 0 24px;
+  font-size: 15px; color: var(--ink-soft); text-align: center;
+}
+
+/* ─── the region list, which is the map's table view ─────────────────── */
+/* Three across, which is why this list sits in the wide column rather than the
+   article's 640px: at three columns of a narrow measure a region's name and its
+   count fight for the same line. Regions wrap onto as many rows as they need —
+   five today, nine when the rest are drawn. */
+.regions {
+  margin: 34px 0 10px;
+  display: grid; gap: 0 32px;
+  grid-template-columns: repeat(3, 1fr);
+}
+/* Two columns inside the cell — the swatch, then everything else — with the
+   count and the not-yet note on a line of their own beneath the blurb. Beside
+   it, as they were in the full-width list, they took a third of a grid cell and
+   broke the blurb into two-word lines. */
+.region-row {
+  display: grid;
+  grid-template-columns: 11px 1fr;
+  column-gap: 12px; row-gap: 8px;
+  align-content: start;
+  padding: 18px 0; border-top: 1px solid var(--rule);
+  color: inherit; text-decoration: none;
+}
+.region-meta {
+  grid-column: 2;
+  display: flex; flex-wrap: wrap; gap: 4px 14px;
+}
+/* In a grid the rule belongs to every cell, not to the last child of a list —
+   the bottom edge is drawn by the row beneath, and the final row draws its own. */
+.regions > :nth-last-child(-n+3) { border-bottom: 1px solid var(--rule); }
+a.region-row:hover .region-name { color: var(--russet); }
+.region-swatch { width: 11px; height: 11px; border-radius: 1px; margin-top: 8px; }
+.region-body { flex: 1 1 auto; }
+.region-name { display: block; font-size: 20px; font-weight: 600; line-height: 1.3; }
+.region-blurb { display: block; color: var(--ink-soft); font-size: 16px; line-height: 1.5; margin-top: 2px; }
+.region-count, .region-soon {
+  color: var(--ink-soft); font-size: 14px; white-space: nowrap;
+}
+.region-soon { color: var(--russet); }
+.region-row.is-quiet .region-name { color: var(--ink-soft); }
+
+@media (max-width: 1000px) {
+  .regions { grid-template-columns: repeat(2, 1fr); }
+  .regions > :nth-last-child(-n+3) { border-bottom: 0; }
+  .regions > :nth-last-child(-n+2) { border-bottom: 1px solid var(--rule); }
+}
+
+@media (max-width: 720px) {
+  .region-pin-name, .region-pin-count { display: none; }
+  .region-pin { padding: 5px; gap: 0; }
+  .regions { grid-template-columns: 1fr; gap: 0; }
+  .regions > :nth-last-child(-n+2) { border-bottom: 0; }
+  .regions > :last-child { border-bottom: 1px solid var(--rule); }
+}
+
+/* ─── cards, for the notes index ────────────────────────────────────── */
+.cards { display: grid; gap: 2px; margin: 40px 0 0; }
+.card {
+  display: block; text-decoration: none; color: inherit;
+  padding: 26px 0; border-top: 1px solid var(--rule);
+}
+.card:last-child { border-bottom: 1px solid var(--rule); }
+.card:hover .card-title { color: var(--russet); }
+.card-meta { font-size: 15px; color: var(--ink-soft); margin-bottom: 6px; }
+.card-title {
+  font-family: var(--font);
+  font-size: 21px; font-weight: 700; line-height: 1.3; margin: 0 0 8px; letter-spacing: .025em;
+}
+.card-dek { margin: 0; color: var(--ink-soft); font-size: 17px; }
+
+/* ─── zone reference table ──────────────────────────────────────────── */
+.table-wrap { overflow-x: auto; margin: 28px 0 8px; }
+table.zones { width: 100%; border-collapse: collapse; font-size: 15px; }
+table.zones th, table.zones td {
+  text-align: left; padding: 11px 14px 11px 0;
+  border-bottom: 1px solid var(--rule); white-space: nowrap;
+}
+table.zones th { font-size: 15px; color: var(--ink-soft); font-weight: 600; }
+table.zones td.name { font-family: var(--font); font-size: 17px; }
+table.zones td.num { font-variant-numeric: tabular-nums; color: var(--ink-soft); }
+
+/* ─── footer ────────────────────────────────────────────────────────── */
+.site-foot {
+  margin-top: 90px; border-top: 1px solid var(--rule-firm);
+  padding: 34px 0 60px;
+}
+.site-foot-in {
+  max-width: var(--wide); margin: 0 auto; padding: 0 24px;
+  display: flex; gap: 22px; flex-wrap: wrap;
+  font-size: 15px; color: var(--ink-soft);
+}
+.site-foot-in a { color: var(--ink-soft); text-decoration: none; }
+.site-foot-in a:hover { color: var(--russet); }
+.site-foot-in .spacer { margin-left: auto; }
+
+@media (max-width: 720px) {
+  body { font-size: 16px; }
+  .lede { padding-top: 46px; }
+  .site-nav { gap: 14px; }
+}

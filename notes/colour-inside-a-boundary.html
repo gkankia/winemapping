@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<title>Colour inside a boundary — Nine Microzones</title>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght,GRAD@0,17..18,400..700,-50..200;1,17..18,400..700,-50..200&amp;family=IBM+Plex+Mono:wght@500&amp;display=swap" rel="stylesheet">
+<link href="../assets/site.css?v=20260831h" rel="stylesheet">
+</head>
+<body>
+
+<header class="site-head">
+  <div class="site-head-in">
+    <a class="wordmark" href="../index.html"><span lang="en">Wine <span>Geography</span></span><span lang="ka">ღვინის <span>გეოგრაფია</span></span></a>
+    <nav class="site-nav">
+      <a href="../index.html" data-i18n="nav.regions">Regions</a>
+      <a href="../notes.html" aria-current="page" data-i18n="nav.notes">Notes</a>
+      <a href="../about.html" data-i18n="nav.about">About</a>
+    </nav>
+  </div>
+</header>
+
+<article class="prose lede">
+  <p class="eyebrow" lang="en">Build note</p>
+  <p class="eyebrow" lang="ka">ტექნიკური ჩანაწერი</p>
+  <h1 class="title" lang="en">Colour inside a boundary, black and white outside it</h1>
+  <h1 class="title" lang="ka">ფერი საზღვრის შიგნით, შავ-თეთრი გარეთ</h1>
+    <p class="lang-pending" lang="ka">ამ გვერდის ძირითადი ტექსტი ჯერ ინგლისურადაა.
+      სათაურები და რუკის ინტერფეისი ქართულადაა; სტატიის თარგმანი მოგვიანებით
+      დაემატება.</p>
+  <p class="standfirst">The effect is simple to describe and awkward to build:
+    satellite imagery in full colour inside a microzone, desaturated everywhere
+    else, dissolving across the boundary rather than stopping at it.</p>
+  <p class="byline">24 August 2026 · build note</p>
+
+  <p>Mapbox GL JS has no way to clip a raster layer to a polygon. That single
+    fact rules out the obvious approaches, and it's worth walking through why,
+    because each one looks like it should work.</p>
+
+  <h3>The inverse mask</h3>
+  <p>The standard trick for isolating a region: build one polygon whose outer
+    ring is a generous local bounding box and whose holes are your boundary,
+    then draw it opaque above the imagery. Everything outside the hole is
+    covered; the region shows through. It is genuinely the right answer when
+    what you want is <em>region visible, surroundings suppressed</em>.</p>
+  <p>It cannot do this job, though, because a fill can only add colour on top.
+    It can hide the imagery outside the boundary, but it cannot make that imagery
+    render differently — and grey at partial opacity is not desaturation, it's a
+    tint. The green bleeds through and the outside reads as murky rather than
+    neutral.</p>
+
+  <h3>Two raster layers</h3>
+  <p>So: colour imagery at the bottom, a desaturated copy of the same source
+    above it, and punch a hole in the top one. Except that punching a hole in a
+    raster layer is the thing that isn't possible. Reversing the stack doesn't
+    help — whichever layer needs the hole, it's a raster.</p>
+
+  <h3>The clip layer</h3>
+  <p>GL JS v3 added a <code>clip</code> layer type, which sounds exactly right.
+    Its <code>clip-layer-types</code> accepts <code>model</code>,
+    <code>symbol</code> and <code>fill-extrusion</code>. Not <code>raster</code>.
+    And it clips content <em>inside</em> the clip polygon, which is the opposite
+    of what's wanted here.</p>
+
+  <h3>Two synced maps</h3>
+  <p>Two map instances, one desaturated and one in colour, the top one masked to
+    the boundary with CSS. This does work, and it's the approach to reach for if
+    the shape has to be interactive. The costs are a second WebGL context, camera
+    synchronisation on every frame, and a mask that has to be reprojected to
+    screen coordinates as the camera moves — for a feathered edge that means
+    regenerating an SVG or data-URI mask per frame.</p>
+
+  <h3>What the piece actually does</h3>
+  <p>The boundaries don't move relative to the world, so the mask doesn't have to
+    live in screen space at all. Do the cut once, in pixels, and hand the result
+    back as geography:</p>
+  <ol>
+    <li>Request the zone's bounding box from the Static Images API — full-colour
+      satellite, up to 1280&nbsp;px a side at <code>@2x</code>.</li>
+    <li>Draw it into a canvas.</li>
+    <li>Composite the boundary path over it with <code>destination-in</code>, so
+      only what falls inside the shape survives.</li>
+    <li>Add the canvas as an <code>image</code> source with the bbox corners as
+      its coordinates, above a globally desaturated satellite layer.</li>
+  </ol>
+  <p>Mapbox then reprojects and scales that image like any other raster. No
+    second context, no per-frame work, no CSS masking.</p>
+
+  <h3>Two details that matter</h3>
+  <p>The pixel mapping has to be Mercator, not linear in degrees. A static image
+    comes back in Web Mercator, so the y coordinate of each boundary vertex is
+    <code>log(tan(π/4 + φ/2))</code> scaled across the box, not a straight
+    interpolation of latitude. Getting this wrong puts the mask a few per cent off
+    the imagery — invisible in the middle of the shape, obvious at the edge.</p>
+  <p>And the feather should not come from <code>ctx.filter</code>. It's the
+    natural choice — <code>filter = 'blur(80px)'</code> before the composite —
+    but it's missing in Safari before 17, and when it's missing the code doesn't
+    fail, it silently produces a hard edge: precisely the artefact the technique
+    exists to avoid. A drop shadow does the same job everywhere. Park the path
+    off-canvas, offset the shadow back into frame, and use the blurred silhouette
+    as the alpha channel.</p>
+
+  <p class="note">The implementation is <code>buildPatch()</code> in
+    <code>assets/scroll.js</code>. Its two knobs are <code>PATCH_PAD</code>, the
+    margin around the zone so the blur has room to spill, and
+    <code>PATCH_FEATHER</code>, the blur radius as a fraction of the patch's
+    short side.</p>
+</article>
+
+<footer class="site-foot">
+  <div class="site-foot-in">
+    <span>Wine Geography of Georgia</span>
+    <a href="../notes.html" data-i18n="nav.notes">All notes</a>
+    <a href="../index.html" data-i18n="nav.regions">Regions</a>
+    <span class="spacer">Giorgi Kankia · 2026</span>
+  </div>
+</footer>
+<script src="../assets/i18n.js?v=20260831h"></script>
+</body>
+</html>

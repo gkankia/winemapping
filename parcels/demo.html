@@ -1,0 +1,131 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Vineyard parcels</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ctext y='13' font-size='14'%3E%F0%9F%8D%87%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.min.css">
+<style>
+  :root{--ink:#f4efe9;--bg:#14100f;--panel:rgba(20,16,15,.88);--line:rgba(244,239,233,.16)}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);
+    font:15px/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  #map{position:absolute;inset:0}
+  .panel{position:absolute;z-index:2;background:var(--panel);backdrop-filter:blur(10px);
+    border:1px solid var(--line);border-radius:12px;padding:13px 15px}
+  #hud{top:14px;left:14px;min-width:250px}
+  #hud b{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:#a99e94;margin-bottom:8px}
+  #n{font-size:1.05rem;font-weight:600}
+  #d{display:block;font-weight:400;font-size:.82rem;color:#b6aaa0;margin-top:3px}
+  #dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:7px;vertical-align:1px}
+  #ctl{bottom:14px;left:14px;display:flex;gap:7px;flex-wrap:wrap}
+  button{background:#241d1c;color:var(--ink);border:1px solid var(--line);border-radius:8px;
+    padding:6px 11px;font:inherit;font-size:.83rem;cursor:pointer}
+  button:hover{background:#312826}
+  button[aria-pressed=true]{background:#e0a44e;color:#1b1412;border-color:#e0a44e}
+  .maplibregl-popup-content{background:#1d1817;color:var(--ink);border-radius:10px;
+    font-size:.82rem;padding:12px 14px;max-width:320px}
+  .maplibregl-popup-content b{color:#e0a44e}
+  .maplibregl-popup-tip{border-top-color:#1d1817!important;border-bottom-color:#1d1817!important}
+  .vt{border-collapse:collapse;margin-top:6px;width:100%}
+  .vt td{padding:2px 0}
+  .vt td:last-child{text-align:right;color:#b6aaa0;white-space:nowrap;padding-left:12px}
+  .meta{color:#a99e94;font-size:.76rem;margin-top:7px;border-top:1px solid var(--line);padding-top:6px}
+</style>
+
+<div id="map"></div>
+<div class="panel" id="hud"><b>Parcels in view</b>
+  <span id="n"><span id="dot"></span>starting…</span><small id="d">&nbsp;</small></div>
+<div class="panel" id="ctl">
+  <button id="grape" aria-pressed="true">Grape</button>
+  <button id="year">Year</button>
+  <button id="size">Size</button>
+  <button id="dl">Download GeoJSON</button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.min.js"></script>
+<script type="module">
+import { bindToMap, FILL_BY_GRAPE, FILL_BY_YEAR, FILL_BY_SIZE } from './vineyard-parcels.js';
+
+const map = new maplibregl.Map({
+  container: 'map',
+  style: { version: 8, sources: {}, layers: [
+    { id: 'bg', type: 'background', paint: { 'background-color': '#14100f' } }] },
+  center: [43.04, 42.55], zoom: 15.5,
+});
+map.addControl(new maplibregl.NavigationControl(), 'top-right');
+map.addControl(new maplibregl.ScaleControl({ maxWidth: 110 }));
+window.__map = map;
+
+map.on('load', () => {
+  const src = bindToMap(map, {
+    minZoom: 12,
+    onState: (s) => {
+      const dot = document.getElementById('dot');
+      dot.style.background = { loading:'#e0a44e', ready:'#69c07c',
+        'zoomed-out':'#8a8078', error:'#e05252' }[s.status] ?? '#888';
+      const n = document.getElementById('n'), d = document.getElementById('d');
+      if (s.status === 'loading')
+        { n.innerHTML = `${dot.outerHTML}loading…`;
+          d.textContent = s.calls ? `${s.calls} calls · ${s.rows} rows so far` : `z${s.zoom.toFixed(1)}`; }
+      else if (s.status === 'ready')
+        { n.innerHTML = `${dot.outerHTML}${s.parcels.toLocaleString('en')} parcels`;
+          d.textContent = `${s.rows.toLocaleString('en')} rows · ${s.calls} call${s.calls>1?'s':''}` +
+                          ` · ${(s.ms/1000).toFixed(1)}s${s.truncated ? ' · TRUNCATED' : ''}`; }
+      else if (s.status === 'zoomed-out')
+        { n.innerHTML = `${dot.outerHTML}zoomed out`; d.textContent = `parcels load from z${s.minZoom}`; }
+      else if (s.status === 'error')
+        { n.innerHTML = `${dot.outerHTML}error`; d.textContent = s.message; }
+    },
+  });
+
+  // bindToMap created the 'parcels' source above — layers must come after it.
+  map.addLayer({ id: 'fill', type: 'fill', source: 'parcels', paint: {
+    'fill-color': FILL_BY_GRAPE,
+    'fill-opacity': ['case', ['boolean', ['feature-state','hover'], false], 0.95, 0.75] } });
+  map.addLayer({ id: 'line', type: 'line', source: 'parcels', paint: {
+    'line-color': ['case', ['boolean', ['feature-state','hover'], false], '#f4efe9', 'rgba(244,239,233,.3)'],
+    'line-width': ['case', ['boolean', ['feature-state','hover'], false], 1.8, 0.5] } });
+
+  let hover = null;
+  map.on('mousemove', 'fill', (e) => {
+    map.getCanvas().style.cursor = 'pointer';
+    const id = e.features[0].id;
+    if (hover === id) return;
+    if (hover != null) map.setFeatureState({ source:'parcels', id:hover }, { hover:false });
+    hover = id; map.setFeatureState({ source:'parcels', id:hover }, { hover:true });
+  });
+  map.on('mouseleave', 'fill', () => {
+    map.getCanvas().style.cursor = '';
+    if (hover != null) map.setFeatureState({ source:'parcels', id:hover }, { hover:false });
+    hover = null;
+  });
+
+  map.on('click', 'fill', (e) => {
+    const p = e.features[0].properties;
+    // MapLibre serialises nested props to JSON strings on the way out.
+    const vs = typeof p.varieties === 'string' ? JSON.parse(p.varieties) : p.varieties;
+    new maplibregl.Popup({ maxWidth: '320px' }).setLngLat(e.lngLat).setHTML(
+      `<b>Parcel · ${(+p.Fartobi_kvm).toLocaleString('en')} m²</b><table class="vt">` +
+      vs.map((v) => `<tr><td>${v.variety}${v.varietyKa
+          ? ` <span style="color:#8d837b">${v.varietyKa}</span>` : ''}</td>` +
+        `<td>${v.area.toLocaleString('en')} m²${v.year ? ` · ${v.year}` : ''}</td></tr>`).join('') +
+      `</table><div class="meta">${p.Microzone_ENG || '—'} · ${p.Municipaliteti_ENG || ''}<br>` +
+      `${vs.length} ${vs.length === 1 ? 'variety' : 'varieties'}</div>`
+    ).addTo(map);
+  });
+
+  const MODES = { grape: FILL_BY_GRAPE, year: FILL_BY_YEAR, size: FILL_BY_SIZE };
+  Object.keys(MODES).forEach((k) => document.getElementById(k).onclick = () => {
+    map.setPaintProperty('fill', 'fill-color', MODES[k]);
+    Object.keys(MODES).forEach((x) =>
+      document.getElementById(x).setAttribute('aria-pressed', String(x === k)));
+  });
+
+  document.getElementById('dl').onclick = () => {
+    const data = map.getSource('parcels')?._data;
+    if (!data?.features?.length) return;
+    const url = URL.createObjectURL(new Blob([JSON.stringify(data)], { type: 'application/geo+json' }));
+    Object.assign(document.createElement('a'), { href: url, download: 'parcels.geojson' }).click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
+});
+</script>

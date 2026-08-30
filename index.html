@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<title>Wine Geography of Georgia</title>
+<meta name="description" content="Mapping Georgia's wine regions, microzone by microzone.">
+
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght,GRAD@0,17..18,400..700,-50..200;1,17..18,400..700,-50..200&amp;family=IBM+Plex+Mono:wght@500&amp;display=swap" rel="stylesheet">
+<link href="assets/site.css?v=20260831h" rel="stylesheet">
+</head>
+<body>
+
+<header class="site-head">
+  <div class="site-head-in">
+    <a class="wordmark" href="index.html"><span lang="en">Wine <span>Geography</span></span><span lang="ka">ღვინის <span>გეოგრაფია</span></span></a>
+    <nav class="site-nav">
+      <a href="index.html" aria-current="page" data-i18n="nav.regions">Regions</a>
+      <a href="notes.html" data-i18n="nav.notes">Notes</a>
+      <a href="about.html" data-i18n="nav.about">About</a>
+    </nav>
+  </div>
+</header>
+
+<article>
+  <div class="prose lede">
+    <p class="eyebrow" lang="en">Georgia · vineyards</p>
+    <p class="eyebrow" lang="ka">საქართველო · ვენახები</p>
+
+    <h1 class="title" lang="en">The wine geography of Georgia</h1>
+    <h1 class="title" lang="ka">საქართველოს მევენახეობისა და ღვინის გეოგრაფია</h1>
+
+    <p class="standfirst" lang="en">Georgian wine is usually described by appellation.
+      This project works a level down — at the microzone, where a boundary is small
+      enough that you can see the vineyards inside it from the air. One page per
+      region, as each is drawn.</p>
+    <p class="standfirst" lang="ka">ქართულ ღვინოს ჩვეულებრივ აპელაციით აღწერენ. ეს
+      პროექტი ერთი საფეხურით ქვემოთ მუშაობს — მიკროზონაზე, სადაც საზღვარი იმდენად
+      მცირეა, რომ მასში მოქცეული ვენახები ჰაერიდან ჩანს. თითო გვერდი თითო
+      რეგიონისთვის, როგორც კი დაიხაზება.</p>
+    <p class="lang-pending" lang="ka">ამ გვერდის ძირითადი ტექსტი ჯერ ინგლისურადაა.
+      სათაურები, რეგიონები და რუკის ინტერფეისი ქართულადაა.</p>
+  </div>
+
+  <!-- ── the country ─────────────────────────────────────────────────── -->
+  <figure class="country">
+    <img class="country-map" src="img/wine-geography-ka.png"
+         alt="Relief map of Georgia with the vineyard areas hatched"
+         width="2000" height="1414" loading="lazy">
+    <figcaption class="country-note" data-i18n="hub.mapNote"></figcaption>
+  </figure>
+
+  <!-- ── rtveli ──────────────────────────────────────────────────────── -->
+  <div class="prose">
+    <h2 lang="en">Rtveli</h2>
+    <h2 lang="ka">რთველი</h2>
+
+    <p lang="en">Rtveli is the grape harvest, and the weeks the rest of the year
+      is arranged around. It runs from late summer into autumn, and its timing is
+      geography made visible: the warm valley floors come in first, the higher and
+      later-ripening zones weeks behind them, so the same variety is picked at
+      different times a short drive apart.</p>
+    <p lang="ka">რთველი ყურძნის კრეფის სეზონია — კვირეები, რომელთა გარშემოც წლის
+      დანარჩენი დროა გაწყობილი. ზაფხულის ბოლოდან შემოდგომამდე გრძელდება და მისი
+      ვადა თავად გეოგრაფიას იმეორებს: ჯერ თბილი დაბლობი იკრიფება, უფრო მაღალი და
+      გვიან მწიფე ზონები კი კვირებით გვიან — ისე, რომ ერთი და იგივე ჯიში ერთმანეთთან
+      ახლოს სხვადასხვა დროს იკრიფება.</p>
+
+    <p lang="en">That is the argument for the microzone in a sentence. An
+      appellation can cover ground that ripens a fortnight apart; a microzone
+      usually does not. What the harvest calendar separates, a boundary drawn at
+      this scale can hold together.</p>
+    <p lang="ka">სწორედ ეს არის მიკროზონის საჭიროების მთავარი არგუმენტი. აპელაცია
+      შეიძლება მოიცავდეს ისეთ ტერიტორიას, სადაც მოსავალი ორი კვირის სხვაობით
+      მწიფდება; მიკროზონა — ჩვეულებრივ არა. რასაც რთველის კალენდარი ჰყოფს, ამ
+      მასშტაბით გავლებული საზღვარი ერთად იკავებს.</p>
+
+    <p class="note"><span class="todo">Dates per region, and what the register
+      records about picking order — to be written once the harvest data is
+      in.</span></p>
+  </div>
+
+  <!-- ── the regions ─────────────────────────────────────────────────── -->
+  <div class="prose prose-wide">
+    <div id="region-list" class="regions"></div>
+  </div>
+
+  <div class="prose">
+    <h2 lang="en">What each page does</h2>
+    <h2 lang="ka">რას აკეთებს თითოეული გვერდი</h2>
+
+    <p>A regional page takes its microzones one at a time. The map holds the region
+      in black and white; only the zone under discussion carries colour, blended
+      with the Soviet 1:50&nbsp;000 sheet for the same ground, and the colour
+      dissolves at the boundary rather than stopping at a line. Where the vineyard
+      register has parcels, they can be drawn inside the zone and coloured by vine
+      or by planting year.</p>
+
+    <p class="note">Boundaries are held as GeoJSON in <code>zones/</code> and grouped
+      into regions in <code>assets/regions.js</code>. A region appears on this map as
+      soon as its files are listed there, whether or not it has a page yet.</p>
+  </div>
+</article>
+
+<footer class="site-foot">
+  <div class="site-foot-in">
+    <span>Wine Geography of Georgia</span>
+    <a href="notes.html" data-i18n="nav.notes">Notes</a>
+    <a href="about.html" data-i18n="nav.about">About</a>
+    <span class="spacer">Giorgi Kankia · 2026</span>
+  </div>
+</footer>
+
+<script src="assets/i18n.js?v=20260831h"></script>
+<script src="assets/regions.js?v=20260831h"></script>
+<script src="assets/hub.js?v=20260831h"></script>
+</body>
+</html>

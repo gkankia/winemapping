@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<title>Seam studio — Nine Microzones</title>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght,GRAD@0,17..18,400..700,-50..200;1,17..18,400..700,-50..200&amp;family=IBM+Plex+Mono:wght@500&amp;display=swap" rel="stylesheet">
+<link href="assets/site.css?v=20260831h" rel="stylesheet">
+<style>
+  /* A tool, not a page of the site: it gets its own compact chrome. */
+  .studio { max-width: 1400px; margin: 0 auto; padding: 26px 24px 70px; }
+  .studio-head { display: flex; align-items: baseline; gap: 18px; flex-wrap: wrap; margin-bottom: 18px; }
+  .studio-head h1 { font-family: var(--font); font-size: 24px; font-weight: 700; margin: 0; letter-spacing: .03em; }
+  .studio-head p { margin: 0; color: var(--dim); font-size: 14px; }
+
+  #preview {
+    position: relative; width: 100%; aspect-ratio: 16 / 8;
+    overflow: hidden; background: var(--paper-edge); border: 1px solid var(--rule-firm);
+    touch-action: none; cursor: crosshair;
+  }
+  #map-side, #photo-side { position: absolute; inset: 0; background-size: cover; background-position: center; }
+  #map-side { filter: grayscale(1) sepia(.45) contrast(1.02) brightness(.95); }
+  #photo-side { background-color: #55402a; }
+  #handles { position: absolute; inset: 0; }
+  #handles .seam { fill: none; stroke: rgba(156,84,38,.9); stroke-width: 1.5; stroke-dasharray: 6 5;
+                   pointer-events: none; }
+  /* An invisible fat copy of the seam, which is what the pointer actually hits.
+     The visible dashes are 1.5px and impossible to double-click accurately. */
+  #handles .seam-hit { fill: none; stroke: transparent; stroke-width: 14; cursor: copy; }
+  #handles circle { fill: var(--russet); stroke: var(--paper); stroke-width: 2; cursor: grab; }
+  #handles circle.edge { fill: var(--ink); }
+  /* Where the zone will actually be fitted, given this seam. */
+  #handles .band { fill: rgba(244,236,216,.10); stroke: rgba(244,236,216,.85);
+                   stroke-width: 1.5; stroke-dasharray: 6 5; pointer-events: none;
+                   filter: drop-shadow(0 0 2px rgba(20,14,8,.7)); }
+  #handles .band.tight { fill: rgba(156,84,38,.16); stroke: rgba(156,84,38,.8); }
+  #handles circle:active { cursor: grabbing; }
+
+  .row { display: flex; gap: 18px; flex-wrap: wrap; align-items: center; margin: 16px 0; }
+  .row label { font-family: var(--font);
+               letter-spacing: .1em; font-size: 13px; color: var(--ink-soft); }
+  select, input[type=range] { accent-color: var(--russet); }
+  select {
+    background: var(--paper); color: var(--ink); border: 1px solid var(--rule-firm);
+    padding: 6px 10px; font-family: inherit; font-size: 16px;
+  }
+  .btn {
+    background: var(--paper-deep); border: 1px solid var(--rule-firm); color: var(--ink);
+    padding: 6px 14px; cursor: pointer;
+    font-family: var(--font);
+    letter-spacing: .1em; font-size: 13px;
+  }
+  .btn:hover { background: var(--russet); color: var(--paper); border-color: var(--russet); }
+  #out {
+    width: 100%; min-height: 84px; margin-top: 6px; padding: 14px 16px;
+    background: var(--paper-deep); color: var(--ink); border: 1px solid var(--rule-firm);
+    font-family: var(--font-mono); font-size: 12px; line-height: 1.6;
+    resize: vertical; word-break: break-all;
+  }
+  .hint { font-size: 16px; color: var(--ink-soft); margin: 6px 0 0; }
+  .hint kbd {
+    font-family: var(--font-mono); font-size: 12px;
+    background: rgba(51,41,31,.08); padding: 1px 6px; border-radius: 2px;
+  }
+</style>
+</head>
+<body>
+
+<header class="site-head">
+  <div class="site-head-in">
+    <a class="wordmark" href="index.html"><span lang="en">Wine <span>Geography</span></span><span lang="ka">ღვინის <span>გეოგრაფია</span></span></a>
+    <nav class="site-nav">
+      <a href="index.html" data-i18n="nav.regions">Regions</a>
+      <a href="notes.html" data-i18n="nav.notes">Notes</a>
+      <a href="about.html" data-i18n="nav.about">About</a>
+    </nav>
+  </div>
+</header>
+
+<div class="studio">
+  <div class="studio-head">
+    <h1>Seam studio</h1>
+    <p>Drag the seam between map and photograph. Copy the path into the zone's manifest entry.</p>
+  </div>
+
+  <div id="preview">
+    <div id="map-side"></div>
+    <div id="photo-side"></div>
+    <svg id="handles" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+  </div>
+
+  <div class="row">
+    <label for="zone">Zone</label>
+    <select id="zone"></select>
+
+    <label for="preset">Preset</label>
+    <select id="preset">
+      <option value="in use">In use (the shipped default)</option>
+      <option value="wave">Wave</option>
+      <option value="straight">Straight</option>
+      <option value="diagonal">Diagonal</option>
+      <option value="arc">Arc</option>
+      <option value="notch">Notch</option>
+    </select>
+
+    <label for="side">Photo on</label>
+    <select id="side">
+      <option value="right">Right</option>
+      <option value="left">Left</option>
+      <option value="bottom">Bottom</option>
+      <option value="top">Top</option>
+    </select>
+
+    <label for="feather">Feather <span id="feather-val">62</span>px</label>
+    <!-- starts at MASK_FEATHER_PX, so what you see first is what ships -->
+    <input type="range" id="feather" min="0" max="240" value="62">
+
+    <button class="btn" id="add">Add point</button>
+    <button class="btn" id="copy">Copy path</button>
+    <button class="btn" id="try">Test on the slides</button>
+  </div>
+
+  <p class="hint">
+    Drag any point. <kbd>Click</kbd> the dashed seam to add one — or
+    <kbd>Double-click</kbd> anywhere, or use <em>Add point</em>.
+    <kbd>Alt</kbd>-click a point to remove it. The two end points stay pinned to
+    their edges so the shape always closes. Feather previews
+    <code>MASK_FEATHER_PX</code> and is not part of the path.
+    <em>Test on the slides</em> opens the real piece using this seam.
+  </p>
+
+  <p class="hint" id="band-note"></p>
+  <textarea id="out" readonly spellcheck="false"></textarea>
+  <p class="hint">Paste into the zone in <code>assets/zones.js</code> as
+    <code>mask: '…'</code> — with <code>photoSide: '<span id="side-echo">right</span>'</code>
+    beside it if the side differs from the default. Or replace the matching entry
+    in <code>MASK_SHAPES</code> in <code>assets/scroll.js</code> to change every
+    zone at once.</p>
+</div>
+
+<script src="assets/i18n.js?v=20260831h"></script>
+<script src="assets/zones.js?v=20260831h"></script>
+<script>
+mapboxgl_token = 'pk.eyJ1Ijoiam9yam9uZTkwIiwiYSI6ImNrZ3R6M2FvdTBwbmwycXBibGRqM2w2enYifQ.BxjvFSGqefuC9yFCrXC-nQ';
+
+const PRESETS = {
+  right: {
+    // What the piece ships with — MASK_SHAPES.right in scroll.js, as points.
+    'in use': [[58,0],[54,16],[58,32],[52,47],[47,62],[56,78],[51,100]],
+    wave:     [[60,0],[52,25],[62,50],[50,75],[56,100]],
+    straight: [[56,0],[56,100]],
+    diagonal: [[38,0],[72,100]],
+    arc:      [[64,0],[42,50],[64,100]],
+    notch:    [[58,0],[58,32],[30,46],[58,60],[58,100]]
+  },
+  bottom: {
+    'in use': [[0,58],[16,54],[32,58],[47,52],[62,47],[78,56],[100,51]],
+    wave:     [[0,60],[25,52],[50,64],[75,52],[100,60]],
+    straight: [[0,58],[100,58]],
+    diagonal: [[0,40],[100,72]],
+    arc:      [[0,64],[50,42],[100,64]],
+    notch:    [[0,58],[32,58],[46,32],[60,58],[100,58]]
+  }
+};
+// Left and top are the same seams mirrored, so a shape drawn for one side has a
+// twin on the other and the two layouts stay siblings rather than strangers.
+PRESETS.left = Object.fromEntries(Object.entries(PRESETS.right)
+  .map(([k, pts]) => [k, pts.map(([x, y]) => [100 - x, y])]));
+PRESETS.top = Object.fromEntries(Object.entries(PRESETS.bottom)
+  .map(([k, pts]) => [k, pts.map(([x, y]) => [x, 100 - y])]));
+
+const isVerticalSeam = s => s === 'right' || s === 'left';
+
+const preview = document.getElementById('preview');
+const svg     = document.getElementById('handles');
+const outEl   = document.getElementById('out');
+const zoneSel = document.getElementById('zone');
+const sideSel = document.getElementById('side');
+const featherEl = document.getElementById('feather');
+
+let side = 'right';
+let pts = PRESETS.right['in use'].map(p => ({ x: p[0], y: p[1] }));
+let dragging = null;
+
+/* ─── the path ──────────────────────────────────────────────────────────
+   A Catmull-Rom spline through the dragged points, converted to cubic
+   beziers, then closed along the edge the photograph sits against. Catmull-Rom
+   because it passes exactly through its points: a handle you drag is a place
+   the seam actually goes, which is the only behaviour that feels honest.
+   ─────────────────────────────────────────────────────────────────────── */
+function splinePath(p) {
+  const n = (v) => Number(v.toFixed(2));
+  let d = `M${n(p[0].x)},${n(p[0].y)}`;
+  for (let i = 0; i < p.length - 1; i++) {
+    const p0 = p[i - 1] || p[i], p1 = p[i], p2 = p[i + 1], p3 = p[i + 2] || p[i + 1];
+    const c1 = { x: p1.x + (p2.x - p0.x) / 6, y: p1.y + (p2.y - p0.y) / 6 };
+    const c2 = { x: p2.x - (p3.x - p1.x) / 6, y: p2.y - (p3.y - p1.y) / 6 };
+    d += ` C${n(c1.x)},${n(c1.y)} ${n(c2.x)},${n(c2.y)} ${n(p2.x)},${n(p2.y)}`;
+  }
+  return d;
+}
+
+// Close the seam along whichever edge the photograph sits against. The filled
+// area is the picture; everything outside it is map.
+function closedPath() {
+  const seam = splinePath(pts);
+  const curve = seam.slice(seam.indexOf(' ') + 1);      // drop the leading M
+  const x0 = pts[0].x.toFixed(2), y0 = pts[0].y.toFixed(2);
+  switch (side) {
+    case 'right':  return `M100,0 L${x0},0 ${curve} L100,100 Z`;
+    case 'left':   return `M0,0 L${x0},0 ${curve} L0,100 Z`;
+    case 'bottom': return `M0,100 L0,${y0} ${curve} L100,100 Z`;
+    default:       return `M0,0 L0,${y0} ${curve} L100,0 Z`;
+  }
+}
+
+function maskUrl(path, w, h, blur) {
+  const svgStr =
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">` +
+      `<filter id="f" x="-40%" y="-40%" width="180%" height="180%">` +
+        `<feGaussianBlur stdDeviation="${blur}"/></filter>` +
+      `<g filter="url(#f)"><g transform="scale(${(w/100).toFixed(4)},${(h/100).toFixed(4)})">` +
+        `<path d="${path}" fill="#fff"/></g></g></svg>`;
+  return `url("data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgStr)}")`;
+}
+
+/* ─── where the zone can go ─────────────────────────────────────────────
+   The camera reserves the picture's side by measuring how far the seam reaches
+   in, plus a clearance for the feather. Drawing that here means an over-eager
+   seam shows itself while you draw it, rather than as a squashed zone later.
+
+   Sizes are quoted at a nominal 1440 x 820 frame: the band scales with the
+   viewport, the clearance does not, so it needs a stated reference.
+   ─────────────────────────────────────────────────────────────────────── */
+const NOMINAL = { w: 1440, h: 820 };
+// These are scroll.js's own numbers. They have to be, or the band drawn here is
+// a band the piece never uses — which is exactly what happened while the label
+// moved to the foot of the frame and this file went on reserving a gutter for
+// it beside the zone.
+const FIT_INSET = 34, FAR_EDGE_INSET = 72, MIN_BAND = 170,
+      LABEL_PLACE = 'bottom', LABEL_ROOM = 96,
+      FEATHER_SIGMAS = 1.0, SEAM_CLEARANCE = 8, SEAM_EDGE_TRIM = 12,
+      PICTURE_MAX_SHARE = 0.60;
+
+function seamExtent() {
+  const el = svg.querySelector('.seam');
+  if (!el || !el.getTotalLength) return null;
+  const len = el.getTotalLength();
+  if (!len) return null;
+  // The same trim as seamReach() in scroll.js: a dip in the outer twelfth of an
+  // axis is not charged to the band.
+  let minX = 100, maxX = 0, minY = 100, maxY = 0;
+  for (let i = 0; i <= 240; i++) {
+    const p = el.getPointAtLength(len * i / 240);
+    const inX = p.x >= SEAM_EDGE_TRIM && p.x <= 100 - SEAM_EDGE_TRIM;
+    const inY = p.y >= SEAM_EDGE_TRIM && p.y <= 100 - SEAM_EDGE_TRIM;
+    if (inY) { if (p.x < minX) minX = p.x;  if (p.x > maxX) maxX = p.x; }
+    if (inX) { if (p.y < minY) minY = p.y;  if (p.y > maxY) maxY = p.y; }
+  }
+  if (maxX < minX || maxY < minY) return null;
+  return { minX, maxX, minY, maxY };
+}
+
+function drawBand() {
+  const note = document.getElementById('band-note');
+  const ext = seamExtent();
+  if (!ext) { note.textContent = ''; return; }
+
+  // A transcription of cameraPadding() in scroll.js, at the nominal frame.
+  // Written the same way on purpose: the two drift apart the moment this is
+  // paraphrased instead of copied.
+  const vw = NOMINAL.w, vh = NOMINAL.h;
+  const vertical = isVerticalSeam(side);
+  const clear = Number(featherEl.value) * FEATHER_SIGMAS + SEAM_CLEARANCE;
+  const far = { right: 'left', left: 'right', top: 'bottom', bottom: 'top' }[side];
+
+  const pad = { top: FIT_INSET, bottom: FIT_INSET, left: FIT_INSET, right: FIT_INSET };
+  pad[far] = FAR_EDGE_INSET;
+
+  // How deep the seam reaches, measured from the far side — and the cap, which
+  // is the piece refusing to give the picture more than its share however deep
+  // the seam is drawn.
+  const reach = vertical
+    ? (side === 'right' ? ext.minX : 100 - ext.maxX)
+    : (side === 'bottom' ? ext.minY : 100 - ext.maxY);
+  const capped = reach < (1 - PICTURE_MAX_SHARE) * 100;
+  const edge = Math.max(reach, (1 - PICTURE_MAX_SHARE) * 100);
+
+  if (vertical) {
+    pad[side] += Math.max(0, vw - edge / 100 * vw + clear);
+    pad[LABEL_PLACE] += LABEL_ROOM;
+  } else {
+    pad[side] += Math.max(0, vh - edge / 100 * vh + clear);
+    pad[side === 'bottom' ? 'top' : 'bottom'] += LABEL_ROOM;
+  }
+
+  const x = pad.left / vw * 100, w = 100 - (pad.left + pad.right) / vw * 100;
+  const y = pad.top / vh * 100,  h = 100 - (pad.top + pad.bottom) / vh * 100;
+  const wpx = Math.round(w / 100 * vw), hpx = Math.round(h / 100 * vh);
+  const px = vertical ? wpx : hpx;
+  const tight = px < MIN_BAND;
+
+  if (w > 0 && h > 0) {
+    svg.insertAdjacentHTML('afterbegin',
+      `<rect class="band${tight ? ' tight' : ''}" x="${x.toFixed(2)}" y="${y.toFixed(2)}" ` +
+      `width="${w.toFixed(2)}" height="${h.toFixed(2)}" vector-effect="non-scaling-stroke"/>`);
+  }
+
+  const size = `${Math.max(wpx, 0)} &times; ${Math.max(hpx, 0)}px at 1440 &times; 820`;
+  note.innerHTML = tight
+    ? `<strong style="color:#d95926">Only ${Math.max(px, 0)}px for the zone</strong> — `
+      + `this seam reaches further in than the frame can give, so the piece falls back `
+      + `to a ${MIN_BAND}px band and the zone will sit under the edge of the picture. `
+      + `Pull the seam back, or lower the feather.`
+    : capped
+      ? `The zone is fitted into the dashed band, ${size}. Note that the seam is drawn `
+        + `deeper than the picture's ${Math.round(PICTURE_MAX_SHARE * 100)}% share, so the `
+        + `camera treats it as if it stopped there — the picture will cover part of the zone.`
+      : `The zone is fitted into the dashed band, ${size}, clear of the picture and its `
+        + `feather. The gutter at the ${LABEL_PLACE} is the zone's name.`;
+}
+
+function render() {
+  const d = closedPath();
+  const w = preview.clientWidth, h = preview.clientHeight;
+  // the preview box is smaller than a real stage, so the feather is scaled to
+  // match what the same value will look like at full size
+  const blur = Number(featherEl.value) * (w / window.innerWidth || 1);
+  const url = maskUrl(d, Math.round(w), Math.round(h), blur);
+  const photo = document.getElementById('photo-side');
+  photo.style.webkitMaskImage = url; photo.style.maskImage = url;
+  photo.style.webkitMaskSize = '100% 100%'; photo.style.maskSize = '100% 100%';
+  photo.style.webkitMaskRepeat = 'no-repeat'; photo.style.maskRepeat = 'no-repeat';
+
+  const seam = splinePath(pts);
+  svg.innerHTML =
+    `<path class="seam-hit" d="${seam}" vector-effect="non-scaling-stroke"/>` +
+    `<path class="seam" d="${seam}" vector-effect="non-scaling-stroke"/>` +
+    pts.map((p, i) => {
+      const edge = (i === 0 || i === pts.length - 1) ? ' class="edge"' : '';
+      return `<circle${edge} data-i="${i}" cx="${p.x}" cy="${p.y}" r="1.6"
+               vector-effect="non-scaling-stroke"/>`;
+    }).join('');
+
+  drawBand();
+  outEl.value = d;
+}
+
+/* ─── dragging ──────────────────────────────────────────────────────── */
+const toLocal = ev => {
+  const r = preview.getBoundingClientRect();
+  return {
+    x: Math.max(0, Math.min(100, (ev.clientX - r.left) / r.width * 100)),
+    y: Math.max(0, Math.min(100, (ev.clientY - r.top) / r.height * 100))
+  };
+};
+
+svg.addEventListener('pointerdown', ev => {
+  const c = ev.target.closest('circle');
+  if (!c) return;
+  const i = Number(c.dataset.i);
+  if (ev.altKey && i !== 0 && i !== pts.length - 1) {   // alt-click removes
+    pts.splice(i, 1); render(); return;
+  }
+  dragging = i;
+  svg.setPointerCapture(ev.pointerId);
+});
+
+svg.addEventListener('pointermove', ev => {
+  if (dragging === null) return;
+  const p = toLocal(ev);
+  const first = dragging === 0, last = dragging === pts.length - 1;
+  // end points stay welded to their edge, or the shape stops closing cleanly
+  if (isVerticalSeam(side)) {
+    pts[dragging] = { x: p.x, y: first ? 0 : last ? 100 : p.y };
+  } else {
+    pts[dragging] = { x: first ? 0 : last ? 100 : p.x, y: p.y };
+  }
+  render();
+});
+
+const endDrag = () => { dragging = null; };
+svg.addEventListener('pointerup', endDrag);
+svg.addEventListener('pointercancel', endDrag);
+
+// Insert into the segment the point is nearest to, so the seam keeps its order.
+function addPoint(p) {
+  let best = 1, bestD = Infinity;
+  for (let i = 1; i < pts.length; i++) {
+    const a = pts[i - 1], b = pts[i];
+    const t = Math.max(0, Math.min(1,
+      ((p.x - a.x) * (b.x - a.x) + (p.y - a.y) * (b.y - a.y)) /
+      (((b.x - a.x) ** 2 + (b.y - a.y) ** 2) || 1)));
+    const d = Math.hypot(p.x - (a.x + t * (b.x - a.x)), p.y - (a.y + t * (b.y - a.y)));
+    if (d < bestD) { bestD = d; best = i; }
+  }
+  pts.splice(best, 0, p);
+  render();
+  return best;
+}
+
+// Single click on the seam's hit stroke adds a point — a double-click on a
+// 1.5px dashed line is not a target anyone can hit.
+svg.addEventListener('click', ev => {
+  if (!ev.target.classList.contains('seam-hit')) return;
+  addPoint(toLocal(ev));
+});
+
+// Double-click anywhere in the preview does the same, for when the seam has
+// moved away from where you are looking.
+preview.addEventListener('dblclick', ev => addPoint(toLocal(ev)));
+
+// And a button, which cannot be missed at all: splits the longest segment.
+document.getElementById('add').addEventListener('click', () => {
+  let longest = 1, len = -1;
+  for (let i = 1; i < pts.length; i++) {
+    const d = Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y);
+    if (d > len) { len = d; longest = i; }
+  }
+  const a = pts[longest - 1], b = pts[longest];
+  pts.splice(longest, 0, { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 });
+  render();
+});
+
+/* ─── zone preview: the real photograph over its own satellite ──────── */
+async function loadZone(i) {
+  const z = ZONES[i];
+  const photo = document.getElementById('photo-side');
+  photo.style.backgroundImage = z.photo ? `url("${z.photo}")` : 'none';
+
+  const mapSide = document.getElementById('map-side');
+  mapSide.style.backgroundImage = 'none';
+  try {
+    const fc = await (await fetch(z.file)).json();
+    let w = 180, s = 90, e = -180, n = -90;
+    const walk = c => {
+      if (typeof c[0] === 'number') {
+        w = Math.min(w, c[0]); e = Math.max(e, c[0]);
+        s = Math.min(s, c[1]); n = Math.max(n, c[1]);
+      } else c.forEach(walk);
+    };
+    (fc.features || [fc]).forEach(f => f.geometry && walk(f.geometry.coordinates));
+    const dx = (e - w) * 0.35, dy = (n - s) * 0.35;
+    const box = [w - dx, s - dy, e + dx, n + dy].map(v => v.toFixed(5)).join(',');
+    mapSide.style.backgroundImage =
+      `url("https://api.mapbox.com/styles/v1/mapbox/satellite-v9/static/[${box}]/1000x500` +
+      `?access_token=${mapboxgl_token}&attribution=false&logo=false")`;
+  } catch (err) {
+    console.warn('no geometry for ' + z.name + ' — showing a flat map side', err);
+  }
+}
+
+/* ─── wiring ────────────────────────────────────────────────────────── */
+ZONES.forEach((z, i) => {
+  const o = document.createElement('option');
+  o.value = i; o.textContent = z.name;
+  zoneSel.appendChild(o);
+});
+
+zoneSel.addEventListener('change', () => loadZone(Number(zoneSel.value)));
+sideSel.addEventListener('change', () => {
+  side = sideSel.value;
+  document.getElementById('side-echo').textContent = side;
+  pts = PRESETS[side][document.getElementById('preset').value].map(p => ({ x: p[0], y: p[1] }));
+  render();
+});
+document.getElementById('preset').addEventListener('change', ev => {
+  pts = PRESETS[side][ev.target.value].map(p => ({ x: p[0], y: p[1] }));
+  render();
+});
+featherEl.addEventListener('input', () => {
+  document.getElementById('feather-val').textContent = featherEl.value;
+  render();
+});
+// Hand the path to the real piece as a query parameter. Nothing is written to
+// the manifest until you paste it there — this is a preview, not a save.
+document.getElementById('try').addEventListener('click', () => {
+  const q = new URLSearchParams({ mask: outEl.value, side, zone: zoneSel.value });
+  window.open('wine-zones-map.html?' + q.toString(), '_blank', 'noopener');
+});
+
+document.getElementById('copy').addEventListener('click', async () => {
+  const btn = document.getElementById('copy');
+  try { await navigator.clipboard.writeText(outEl.value); btn.textContent = 'Copied'; }
+  catch (e) { outEl.select(); btn.textContent = 'Select + copy'; }
+  setTimeout(() => { btn.textContent = 'Copy path'; }, 1400);
+});
+window.addEventListener('resize', render);
+
+loadZone(0);
+render();
+</script>
+</body>
+</html>

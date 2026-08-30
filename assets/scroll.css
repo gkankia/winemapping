@@ -1,0 +1,414 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   The scroll piece: a sticky full-viewport stage with chapter panels
+   scrolling over it. Palette tokens come from site.css.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.scrollytelling { position: relative; }
+
+/* The stage sticks to the top for as long as the story section is passing
+   through, then lets go — that release is what allows prose after the map on
+   the same scroll. #story is pulled back over it by exactly one viewport. */
+#stage {
+  position: sticky; top: 0; height: 100vh;
+  overflow: hidden; z-index: 0;
+  background: var(--paper-edge);
+}
+#map { position: absolute; inset: 0; z-index: 0; }
+/* Interaction is on so hover reaches the parcels, but every gesture handler is
+   disabled in the script. This makes sure touch scrolling stays the page's:
+   the map must never claim a vertical drag. */
+#map, #map .mapboxgl-canvas-container, #map canvas { touch-action: pan-y !important; }
+
+.plate {
+  position: absolute; inset: 0; z-index: 1;
+  background-size: cover; background-position: center;
+  pointer-events: none; opacity: 0;
+  transition: opacity 800ms ease;
+  /* Fallback only. The script replaces this with a path-shaped mask as soon as
+     it runs (see MASK_SHAPE in scroll.js); this gradient is what shows in the
+     moment before that, and if scripting is off.
+     A smoothstep-ish ramp: a bare 3-stop gradient bands visibly in an 8-bit mask. */
+  -webkit-mask-image: linear-gradient(to right,
+      transparent var(--mask-start),
+      rgba(0,0,0,.16) calc(var(--mask-start) + (var(--mask-end) - var(--mask-start)) * .25),
+      rgba(0,0,0,.50) calc(var(--mask-start) + (var(--mask-end) - var(--mask-start)) * .50),
+      rgba(0,0,0,.84) calc(var(--mask-start) + (var(--mask-end) - var(--mask-start)) * .75),
+      #000 var(--mask-end));
+  mask-image: linear-gradient(to right,
+      transparent var(--mask-start),
+      rgba(0,0,0,.16) calc(var(--mask-start) + (var(--mask-end) - var(--mask-start)) * .25),
+      rgba(0,0,0,.50) calc(var(--mask-start) + (var(--mask-end) - var(--mask-start)) * .50),
+      rgba(0,0,0,.84) calc(var(--mask-start) + (var(--mask-end) - var(--mask-start)) * .75),
+      #000 var(--mask-end));
+}
+.plate video {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  /* Same framing rule as the still it replaces: the plate covers the whole
+     stage and the mask decides what shows, so the film is sized against the
+     frame, not against the strip that ends up visible. */
+  pointer-events: none;
+}
+
+.plate.is-visible { opacity: 1; }
+
+/* The zone's name, set beside its western edge. Sits above the photo plate so
+   the plate's fade can never eat it, and is positioned entirely by transform —
+   the script writes a translate on every render. */
+#zone-label {
+  position: absolute; left: 0; top: 0; z-index: 2;
+  display: flex; flex-direction: column; align-items: center;
+  text-align: center; pointer-events: none;
+  opacity: 0; transition: opacity 700ms ease 300ms;
+  will-change: transform;
+  max-width: min(520px, 46vw);   /* a long name wraps rather than spanning the map */
+}
+#zone-label.is-visible { opacity: 1; }
+/* Text hangs away from the zone: to its left when the picture is on the right,
+   and the other way about. */
+/* Under the zone or over it — centred either way. */
+#zone-label[data-side="bottom"],
+#zone-label[data-side="top"] { align-items: center; text-align: center; }
+
+.zone-label-name {
+  font-family: var(--font-label);
+  font-weight: 500;
+  font-size: clamp(25px, 2.8vw, 41px);
+  line-height: 1.12; letter-spacing: .02em;
+  color: var(--paper);
+  /* over imagery, not paper — so it keeps its halo */
+  text-shadow: 0 2px 20px rgba(0,0,0,.85), 0 0 4px rgba(0,0,0,.6);
+}
+.zone-label-native {
+  font-family: var(--font-label);
+  font-weight: 500;
+  font-size: clamp(15px, 1.4vw, 20px);
+  line-height: 1.2; margin-top: 5px; letter-spacing: .04em;
+  color: #e8d9ae;
+  text-shadow: 0 2px 14px rgba(0,0,0,.85);
+}
+/* Kupiura carries mkhedruli but no mtavruli, so Georgian zone names are the one
+   thing on the site that is not set upper case — uppercasing them would push the
+   label into a fallback face mid-word. Latin names still are, in JS. */
+.zone-label-name:lang(ka), .zone-label-native:lang(ka) {
+  letter-spacing: .01em;
+}
+
+/* ─── the parcel chapter's controls ──────────────────────────────────────
+   Mapbox's own control, dressed as paper. It is added and removed with the
+   chapter rather than hidden, so nothing of it can be tabbed to while the
+   camera belongs to the scroll — but it is faded in, because a control that
+   pops into a corner reads as a fault. */
+/* The host the control is moved into, above the story panels rather than under
+   them. It covers the frame but takes no clicks; only the buttons do. */
+#map-controls {
+  position: fixed; inset: 0; z-index: 5;
+  pointer-events: none;
+}
+#map-controls .mapboxgl-ctrl-top-right {
+  position: absolute;
+  top: 64px; right: 24px;         /* clear of the language switch */
+}
+#map-controls .mapboxgl-ctrl-group { pointer-events: auto; }
+
+#map-controls .mapboxgl-ctrl-group {
+  background: var(--paper);
+  border: 1px solid rgba(51,41,31,.28);
+  border-radius: 2px;
+  box-shadow: 0 6px 18px rgba(28,20,10,.35);
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(-4px);
+  animation: ctrl-in 420ms ease forwards;
+}
+@keyframes ctrl-in { to { opacity: 1; transform: none; } }
+
+#map-controls .mapboxgl-ctrl-group button + button { border-top: 1px solid rgba(51,41,31,.18); }
+#map-controls .mapboxgl-ctrl-group button { width: 32px; height: 32px; background: transparent; }
+#map-controls .mapboxgl-ctrl-group button:hover { background: rgba(51,41,31,.07); }
+#map-controls .mapboxgl-ctrl-group button .mapboxgl-ctrl-icon {
+  /* The default icons are dark-on-light PNG-ish SVGs; on paper they read as
+     grey rather than ink, so they take the page's own ink. */
+  filter: brightness(0) saturate(100%) invert(14%) sepia(18%) saturate(760%) hue-rotate(348deg);
+}
+
+/* The cursor is the only other signal that the map has been handed over. */
+#stage.is-interactive #map { cursor: grab; }
+#stage.is-interactive #map:active { cursor: grabbing; }
+
+@media (max-width: 780px) {
+  #map-controls .mapboxgl-ctrl-top-right { top: 56px; right: 12px; }
+}
+
+#inset {
+  position: absolute; right: 24px; bottom: 24px;
+  width: 190px; height: 130px; z-index: 2;
+  overflow: hidden;
+  box-shadow: 0 10px 26px rgba(28,20,10,.45), 0 0 0 1px rgba(51,41,31,.5);
+  border: 3px solid var(--paper);
+}
+#inset .mapboxgl-ctrl-bottom-left, #inset .mapboxgl-ctrl-bottom-right { display: none; }
+
+/* The piece signs itself. Mapbox's own wordmark is hidden in favour of it —
+   note that hiding it is only allowed under a plan that waives the attribution
+   requirement, so check the account's terms before this goes public. */
+#stage .mapboxgl-ctrl-logo { display: none; }
+
+#stage-logo {
+  position: absolute; left: 24px; bottom: 24px; z-index: 2;
+  width: 64px; height: auto;
+  opacity: .92;
+  /* Which corner the photograph occupies changes per zone, so the mark cannot
+     count on dark ground: bottom-left can be imagery on one slide and a sunlit
+     vine on the next. Two shadows rather than a plate — a tight one to hold the
+     letterforms against pale grass, a soft one to seat it on dark imagery. */
+  filter: drop-shadow(0 0 1px rgba(20,14,8,.85)) drop-shadow(0 2px 6px rgba(20,14,8,.5));
+  pointer-events: none;
+}
+
+@media (max-width: 780px) {
+  #stage-logo { left: 12px; bottom: 12px; width: 52px; }
+}
+
+#story {
+  position: relative; z-index: 3; pointer-events: none;
+  margin-top: -100vh;              /* scroll the chapters over the sticky stage */
+}
+
+.chapter {
+  min-height: 100vh; display: flex;
+  padding: 0 clamp(18px, 2.2vw, 34px);
+  /* No alignment here: the .chapter--* modifier below sets it. Declaring a
+     default in this rule would beat them — same specificity, later in the
+     file — and the panel would never leave the right-hand side. */
+}
+/* A plate laid on the map: paper, a plate rule, and the shadow of something
+   physically set down rather than a floating UI card.
+
+   Its width comes from the seam — --picture-edge is where the photograph starts,
+   published by the script — so the panel lives inside the picture and cannot
+   overhang the map. It was overhanging by 62px before this, which is what made
+   the panel look like it was sitting on the wrong thing. */
+.panel {
+  pointer-events: auto;
+  /* Scales with the frame: a 540px panel is generous on a laptop and a stamp on
+     a wide monitor. Still bounded by the picture's own edge, so it cannot
+     overhang the map however large the screen gets. */
+  width: clamp(340px, 31vw, 860px);
+  max-width: calc(100vw - var(--picture-edge, 70%) - 3rem);
+  padding: clamp(24px, 1.9vw, 40px) clamp(26px, 2.1vw, 44px);
+  background: var(--paper);
+  border: 1px solid var(--rule-firm);
+  box-shadow: 0 2px 0 rgba(51,41,31,.10), 0 18px 40px rgba(28,20,10,.42);
+  color: var(--ink);
+}
+.panel::before {
+  content: ''; display: block;
+  margin: -14px -16px 16px; padding: 0;
+  border-top: 1px solid var(--rule); height: 0;
+}
+
+/* The panel sits over the photograph, so its corner follows the picture's side.
+   Set by buildStory() from the same value that shapes the mask. */
+.chapter--right  { justify-content: flex-end;   align-items: center; }
+.chapter--left   { justify-content: flex-start; align-items: center; }
+.chapter--bottom { justify-content: center;     align-items: flex-end; padding-bottom: 10vh; }
+.chapter--top    { justify-content: center;     align-items: flex-start; padding-top: 10vh; }
+.chapter--bottom .panel, .chapter--top .panel { max-width: 760px; }
+
+
+/* Scoped to the panel. A bare .eyebrow here would also catch the article's
+   eyebrow on any page that loads both stylesheets — this one loads second, so
+   it won, and the page eyebrow was being sized by the panel's rule. */
+.panel .eyebrow {
+  font-family: var(--font);
+  font-variant-caps: all-small-caps; letter-spacing: .12em;
+  font-size: clamp(19px, 1.3vw, 25px); color: var(--russet); margin-bottom: 12px;
+}
+/* Repeated here for the same reason as in site.css: the :lang rule there is
+   more specific than a bare class, whichever file comes last. */
+.panel .eyebrow:lang(ka) { font-size: clamp(17px, 1.15vw, 22px); }
+.blurb {
+  font-family: var(--font-body);
+  font-size: clamp(17px, 1.05vw, 21px); line-height: 1.6;
+  margin: 0 0 22px; color: var(--ink);
+}
+.facts {
+  background: var(--paper-deep);
+  border: 1px solid var(--rule);
+  padding: 16px 18px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 14px 20px;
+}
+.fact-label { font-size: 15px; color: var(--ink-soft); margin-bottom: 1px; }
+.fact-value {
+  font-family: var(--font-body);
+  font-size: clamp(21px, 1.25vw, 26px); font-weight: 600; line-height: 1.15; color: var(--russet);
+}
+/* Shown only when a seam has been handed over from the studio. */
+#seam-preview-flag {
+  position: fixed; left: 16px; bottom: 16px; z-index: 20;
+  padding: 7px 14px; border: 1px solid var(--rule-firm); background: var(--paper);
+  color: var(--russet); pointer-events: none;
+  font-family: var(--font);
+  font-variant-caps: all-small-caps; letter-spacing: .1em; font-size: 15px;
+}
+
+/* ─── parcel controls, inside a chapter panel ────────────────────────── */
+.parcel-toggle {
+  display: block; width: 100%; margin: 4px 0 0;
+  padding: 10px 16px; cursor: pointer;
+  background: var(--paper-deep);
+  border: 1px solid var(--rule-firm);
+  color: var(--ink);
+  font-size: 16px;
+  transition: background 200ms ease, color 200ms ease;
+}
+.parcel-toggle:hover { background: var(--russet); color: var(--paper); border-color: var(--russet); }
+.parcel-toggle.is-on { background: var(--russet); color: var(--paper); border-color: var(--russet); }
+.parcel-toggle:disabled {
+  border-color: var(--rule); color: var(--ink-soft);
+  cursor: not-allowed; background: var(--paper-deep);
+}
+.parcel-toggle.is-loading { opacity: .7; cursor: progress; }
+
+/* Two ways of colouring the same parcels. Tabs rather than a dropdown: there
+   are exactly two, and both should be visible without a click to discover them. */
+.parcel-tabs { display: flex; gap: 2px; margin: 0 0 14px; }
+.parcel-tab {
+  flex: 1 1 0; padding: 6px 10px; cursor: pointer;
+  background: transparent;
+  border: 1px solid var(--rule); border-bottom-width: 2px;
+  color: var(--ink-soft); font-size: 16px;
+  transition: background 180ms ease, color 180ms ease, border-color 180ms ease;
+}
+.parcel-tab:hover { color: var(--ink); }
+.parcel-tab.is-on {
+  background: var(--paper-deep);
+  border-color: var(--rule-firm); border-bottom-color: var(--russet);
+  color: var(--ink);
+}
+
+.parcel-legend {
+  margin-top: 14px; padding: 16px 0 0;
+  border-top: 1px solid var(--rule-firm);
+}
+.parcel-summary {
+  font-size: 16px; color: var(--russet); margin: 0 0 12px;
+}
+/* The legend is also the table view: every colour is named in text, so identity
+   never rests on colour alone. */
+table.parcel-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+table.parcel-table th, table.parcel-table td {
+  text-align: left; padding: 7px 0; border-bottom: 1px solid var(--rule);
+}
+table.parcel-table td { font-family: var(--font-body); }
+table.parcel-table th {
+  font-family: var(--font);
+  font-variant-caps: all-small-caps; letter-spacing: .09em;
+  font-size: 15px; color: var(--ink-soft); font-weight: 600;
+}
+/* The two numeric columns were colliding — 318 and 73 read as one number. They
+   get their own gutter and only as much width as their digits need, so the
+   variety column keeps the rest. */
+table.parcel-table td.num, table.parcel-table th.num {
+  text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap;
+  padding-left: 20px; width: 1%;
+}
+table.parcel-table td:first-child { padding-right: 4px; }
+table.parcel-table tr:last-child td { border-bottom: none; }
+/* A family and the vines inside it. The class line carries the family total;
+   its shades are stepped in under it, without their own rule, so the group
+   reads as one block rather than five unrelated rows. */
+table.parcel-table tr.is-class td { padding-top: 12px; }
+table.parcel-table tr.is-class td:first-child { font-weight: 600; }
+table.parcel-table tr.is-class + tr.is-shade td { border-top: none; }
+table.parcel-table tr.is-shade td { border-bottom: none; padding-top: 3px; padding-bottom: 3px; }
+table.parcel-table tr.is-shade td:first-child { padding-left: 17px; color: var(--dim); }
+table.parcel-table tr.is-shade .swatch { width: 9px; height: 9px; margin-right: 8px; }
+table.parcel-table tr.is-shade + tr.is-class td { border-top: 1px solid var(--rule); }
+.parcel-warn {
+  margin: 0 0 12px; padding: 8px 11px;
+  background: rgba(156,84,38,.10); border-left: 2px solid var(--russet);
+  font-size: 16px; line-height: 1.45; color: var(--russet);
+}
+/* The varieties inside a class, so the colour is never the only identity.
+   Collapsed to one line, because a class can hold eight of them. */
+.parcel-varieties { font-family: var(--font-body); margin-top: 3px; font-size: 15px; color: var(--ink-soft); }
+.parcel-varieties summary {
+  cursor: pointer; list-style: none; line-height: 1.4;
+  text-decoration: underline; text-decoration-color: var(--rule);
+  text-underline-offset: 3px;
+}
+.parcel-varieties summary::-webkit-details-marker { display: none; }
+.parcel-varieties summary::after { content: ' ▾'; opacity: .6; }
+.parcel-varieties[open] summary::after { content: ' ▴'; }
+.parcel-varieties summary:hover { color: var(--ink); }
+.parcel-varieties ul { list-style: none; margin: 7px 0 0; padding: 0; }
+.parcel-varieties li {
+  display: flex; justify-content: space-between; gap: 12px;
+  padding: 3px 0; line-height: 1.35;
+}
+.parcel-varieties li .num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* ─── parcel tooltip ─────────────────────────────────────────────────── */
+#parcel-tip {
+  position: absolute; left: 0; top: 0; z-index: 4;
+  pointer-events: none; max-width: 320px;
+  padding: 10px 14px 11px;
+  background: var(--paper);
+  border: 1px solid var(--rule-firm);
+  box-shadow: 0 2px 0 rgba(51,41,31,.10), 0 14px 30px rgba(28,20,10,.4);
+  color: var(--ink);
+  will-change: transform;
+}
+#parcel-tip[hidden] { display: none; }
+.tip-head {
+  font-size: 15px; color: var(--russet); margin-bottom: 6px;
+  padding-bottom: 5px; border-bottom: 1px solid var(--rule);
+}
+.tip-outside { font-size: 14px; color: var(--ink-soft); margin-bottom: 4px; }
+.tip-row { margin-bottom: 6px; }
+.tip-row:last-child { margin-bottom: 0; }
+.tip-name {
+  display: block;
+  font-family: var(--font-body); font-size: 16px; color: var(--ink);
+}
+/* Variety names arrive from the register in Georgian and Latin on one line, so
+   the Georgian half is tagged and picks up its own face mid-sentence. */
+.tip-name:lang(ka), .parcel-table td:lang(ka), .parcel-varieties li:lang(ka) {
+  font-family: var(--font);
+}
+.tip-meta { font-family: var(--font-body); display: block; font-size: 14px; color: var(--ink-soft); line-height: 1.4; font-style: italic; }
+.parcel-note {
+  font-family: var(--font-body);
+  margin: 12px 0 0; font-size: 15px; line-height: 1.5; color: var(--ink-soft);
+  font-style: italic;
+}
+.swatch {
+  display: inline-block; width: 11px; height: 11px; border-radius: 1px;
+  margin-right: 9px; vertical-align: baseline;
+  box-shadow: 0 0 0 1px rgba(51,41,31,.45);
+}
+
+#tail { height: 55vh; pointer-events: none; }
+
+
+@media (max-width: 720px) {
+  /* no room beside the zone on a phone — the name goes above it, centred */
+  #zone-label { align-items: center; text-align: center; }
+  .zone-label-name { font-size: 26px; }
+
+  .plate {
+    -webkit-mask-image: linear-gradient(to bottom, transparent 34%, #000 62%);
+    mask-image: linear-gradient(to bottom, transparent 34%, #000 62%);
+  }
+  /* Same trap as above: a bare .chapter here is later in the file than the
+     modifiers, so it would undo them on small screens. Written per side. */
+  .chapter--bottom { padding-bottom: 12vh; }
+  .chapter--top { padding-top: 12vh; }
+  .panel { max-width: 100%; }
+  #inset { width: 128px; height: 88px; right: 12px; bottom: 12px; }
+  .facts { gap: 14px 16px; }
+}
+@media (prefers-reduced-motion: reduce) { .plate { transition: none; } }
