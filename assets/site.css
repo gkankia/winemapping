@@ -85,7 +85,7 @@ table.zones th, .parcel-summary, .tip-head, .tip-outside, .fact-label {
   font-variant-caps: normal;
   font-feature-settings: normal;
   letter-spacing: .1em;
-  font-size: .16px;
+  font-size: 16px;
 }
 
 /* Everything applyCase() raises to upper case has to be on the face that has
