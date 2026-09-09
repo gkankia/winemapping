@@ -97,13 +97,7 @@
       // Optional. Adds a second chapter for this zone with a button that draws
       // its vineyard parcels, fetched live from the NAPR register for the zone's
       // own extent. No file to prepare — set it to true and the zone has parcels.
-      parcels: true,
-      parcelNote: {
-        en: 'One or two sentences on the parcels here — how many holdings, '
-          + 'what is planted, how far back the plantings go.',
-        ka: 'ერთი-ორი წინადადება აქაურ ნაკვეთებზე — რამდენი მეურნეობაა, '
-          + 'რა არის დარგული, რამდენად ძველია ნარგავები.'
-      },
+      
       // Optional. Which side of the frame this zone's photograph takes:
       // 'right' (the default), 'left', 'top' or 'bottom'. The panel, the camera
       // and the zone's name all follow it. In portrait, right folds to bottom and
@@ -113,17 +107,28 @@
       // as an SVG path in a 100x100 box (x right, y down). Filled area is photo.
       // Omit to use MASK_SHAPE, the default in scroll.js.
       blurb: {
-        en: 'One or two sentences. Delete the key to omit.',
-        ka: 'ერთი-ორი წინადადება. წაშალეთ გასაღები, თუ არ გჭირდებათ.'
+        en: `One or two sentences. Delete the key to omit.`,
+        ka: `ახოების მიკროზონა მდებაროებს გურჯაანის მუნიციპალიტეტის სოფელ კარდენახის ადმინისტრაციულ ტერიტორიაზე, მდინარე ალაზნის მარჯვენა სანაპიროზე. 
+        "ახოები" მუქი შეფერილობის, წითელი მშრალი ღვინოა, უზადო, გემოზე სავსე, ექსტრაქტული, ხავერდოვანი, ჰარმონიული, ამ გეოგრაფიული არეალისთვის დამახასიათებელი ჯიშური არომატით. 
+        დავარგებისას უვითარდება მკვეთრად გამოხატული ბუკეტი ხილის ტონებით.`
       },
       // [label, value] — any number, two per row. Either half may be a
       // { en, ka } object; a bare string is used in both languages.
       facts: [
-        [{ en: 'Grapes', ka: 'ჯიშები' }, '—'],
-        [{ en: 'Style',  ka: 'სტილი'  }, '—'],
-        [{ en: 'Region', ka: 'რეგიონი' }, '—'],
-        [{ en: 'Vines',  ka: 'ვაზები' }, '—']
-      ]
+        [
+          { en: `${grapeIcon} Vine`, ka: `${grapeIcon} ვაზი` }, 
+          { en: 'Saperavi', ka: 'საფერავი' }
+        ],
+        [
+          { en: `${terrainIcon} Terrain`, ka: `${terrainIcon} რელიეფი` }, 
+          { en: '350-750 meters A.S.L', ka: '350-750 მეტრი ზღვის დონიდან' }
+        ]
+      ],
+      parcels: true,
+      parcelNote: {
+        en: '',
+        ka: ''
+      }
     },
     {
       name:   'Gurjaani',              // heading
