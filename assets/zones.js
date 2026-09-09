@@ -62,15 +62,12 @@
       // Omit to use MASK_SHAPE, the default in scroll.js.
       blurb: {
         en: 'One or two sentences. Delete the key to omit.',
-        ka: 'ერთი-ორი წინადადება. წაშალეთ გასაღები, თუ არ გჭირდებათ.'
+        ka: 'ახაშენი წითელი, ბუნებრივად ნახევრადტკბილი ღვინოა. იგი ხასიათდება მუქი ლალისფერი შეფერვით, ჰარმონიული, ხავედორვანი სიტკბოთი, ხილის ტონებით და ჯიშური არომატით'
       },
       // [label, value] — any number, two per row. Either half may be a
       // { en, ka } object; a bare string is used in both languages.
       facts: [
-        [{ en: 'Grapes', ka: 'ჯიშები' }, '—'],
-        [{ en: 'Style',  ka: 'სტილი'  }, '—'],
-        [{ en: 'Region', ka: 'რეგიონი' }, '—'],
-        [{ en: 'Vines',  ka: 'ვაზები' }, '—']
+        [{ en: '<i class="fa-solid fa-grapes"></i>', ka: 'ჯიშები' }, '—']
       ],
       parcels: true,
       parcelNote: {
