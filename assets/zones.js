@@ -62,7 +62,7 @@
       // Omit to use MASK_SHAPE, the default in scroll.js.
       blurb: {
         en: 'One or two sentences. Delete the key to omit.',
-        ka: 'ახაშენი წითელი, ბუნებრივად ნახევრადტკბილი ღვინოა. იგი ხასიათდება მუქი ლალისფერი შეფერვით, ჰარმონიული, ხავედორვანი სიტკბოთი, ხილის ტონებით და ჯიშური არომატით'
+        ka: 'ახაშენი წითელი, ბუნებრივად ნახევრადტკბილი ღვინოა და შეიძლება დამზადდეს მხოლოდ საფერავის ჯიშის ყურძნიდან. ღვინო ხასიათდება მუქი ლალისფერი შეფერვით, ჰარმონიული, ხავედორვანი სიტკბოთი, ხილის ტონებით და ჯიშური არომატით.'
       },
       // [label, value] — any number, two per row. Either half may be a
       // { en, ka } object; a bare string is used in both languages.
