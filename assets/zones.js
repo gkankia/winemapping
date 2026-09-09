@@ -22,8 +22,8 @@
    leads with whichever matches the current language.
    ═══════════════════════════════════════════════════════════════════════ */
 
-   const grapeIcon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -3px; margin-right: 4px;"><path d="M12 2v4"/><circle cx="12" cy="8" r="2"/><circle cx="8" cy="11" r="2"/><circle cx="16" cy="11" r="2"/><circle cx="10" cy="15" r="2"/><circle cx="14" cy="15" r="2"/><circle cx="12" cy="19" r="2"/></svg>';
-   const terrainIcon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -3px; margin-right: 4px;"><path d="m8 3 4 8 5-5 5 15H2L8 3z"/><path d="M4.14 15.08 9 11l4 4"/></svg>';
+   const grapeIcon = '<svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -3px; margin-right: 4px;"><path d="M12 2v4"/><circle cx="12" cy="8" r="2"/><circle cx="8" cy="11" r="2"/><circle cx="16" cy="11" r="2"/><circle cx="10" cy="15" r="2"/><circle cx="14" cy="15" r="2"/><circle cx="12" cy="19" r="2"/></svg>';
+   const terrainIcon = '<svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -3px; margin-right: 4px;"><path d="m8 3 4 8 5-5 5 15H2L8 3z"/><path d="M4.14 15.08 9 11l4 4"/></svg>';
 
    const ZONES = [
 
