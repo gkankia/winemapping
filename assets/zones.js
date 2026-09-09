@@ -67,7 +67,13 @@
       // [label, value] — any number, two per row. Either half may be a
       // { en, ka } object; a bare string is used in both languages.
       facts: [
-        [{ en: '<i class="fa-solid fa-grapes"></i>', ka: 'ჯიშები' }, '—']
+        [
+          { 
+            en: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><path d="M12 2v4"/><circle cx="12" cy="8" r="2"/><circle cx="8" cy="11" r="2"/><circle cx="16" cy="11" r="2"/><circle cx="10" cy="15" r="2"/><circle cx="14" cy="15" r="2"/><circle cx="12" cy="19" r="2"/></svg>', 
+            ka: 'ჯიშები' 
+          }, 
+          '—'
+        ]
       ],
       parcels: true,
       parcelNote: {
