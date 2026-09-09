@@ -59,7 +59,7 @@ html { scroll-behavior: smooth; }
 
 body {
   margin: 0;
-  color: var(--ink);
+  color: var(--ink-soft);
   background-color: var(--paper);
   /* The grain is drawn, not photographed: a fine turbulence field at low
      opacity, plus a warm wash that darkens toward the edges the way a page does
