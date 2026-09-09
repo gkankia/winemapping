@@ -64,7 +64,9 @@
       // as an SVG path in a 100x100 box (x right, y down). Filled area is photo.
       // Omit to use MASK_SHAPE, the default in scroll.js.
       blurb: {
-        en: 'One or two sentences. Delete the key to omit.',
+        en: `The Akhasheni micro-zone is located in Inner Kakheti, along the middle reaches of the Alazani River, and encompasses the slopes adjacent to the forests of the Tsiv-Gombori Ridge.
+        The villages included in the micro-zone are Zegaani, Akhasheni, Chumlaki, and Kitaani, as well as a portion of the Gurjaani district territory.
+        Akhasheni is a naturally semi-sweet red wine. It is characterized by a dark ruby color, a harmonious and velvety sweetness, fruity notes, and a distinct varietal aroma.`,
         ka: `ახაშენის მიკროზონა მდებარეობს შიდა კახეთში, მდ. ალაზნის შუა წელში და მოიცავს ცივ-გომბორის ქედის ტყისპირა კალთების გაგრძელებას. 
         მიკროზონაში შემავალი სოფლებია: ზეგაანი, ახაშენი, ჩუმლაყი და ყიტაანი. აგრეთვე, გურჯაანის რაიონული ტერიტორიის ნაწილი.
         ახაშენი წითელი, ბუნებრივად ნახევრადტკბილი ღვინოა. ღვინო ხასიათდება მუქი ლალისფერი შეფერვით, ჰარმონიული, ხავედორვანი სიტკბოთი, ხილის ტონებით და ჯიშური არომატით.`
@@ -83,10 +85,9 @@
       ],
       parcels: true,
       parcelNote: {
-        en: 'One or two sentences on the parcels here — how many holdings, '
-          + 'what is planted, how far back the plantings go.',
+        en: '',
         ka: ''
-      },
+      }
     },
     {
       name:   'Akhoebi',              // heading
