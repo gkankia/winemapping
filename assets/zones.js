@@ -74,11 +74,11 @@
       // { en, ka } object; a bare string is used in both languages.
       facts: [
         [
-          { en: `${grapeIcon} Grapes`, ka: `${grapeIcon} ჯიშები` }, 
+          { en: `${grapeIcon} Vine`, ka: `${grapeIcon} ვაზი` }, 
           { en: 'Saperavi', ka: 'საფერავი' }
         ],
         [
-          { en: `${terrainIcon} Terrain`, ka: `${terrainIcon} გაშენების არეალი` }, 
+          { en: `${terrainIcon} Terrain`, ka: `${terrainIcon} რელიეფი` }, 
           { en: '350-700 meters A.S.L', ka: '350-700 მეტრი ზღვის დონიდან' }
         ]
       ],
