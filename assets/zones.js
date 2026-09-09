@@ -15,7 +15,7 @@
          en: 'One or two sentences.',
          ka: 'ერთი-ორი წინადადება.'
        }
-
+   
    A missing side falls back to the other rather than leaving an empty panel,
    so a half-translated zone reads as unfinished instead of broken. Names are
    separate: `name` is the Latin one and `native` the Georgian, and the piece
@@ -72,7 +72,7 @@
       facts: [
         [
           { en: `${grapeIcon} Grapes`, ka: `${grapeIcon} ჯიშები` }, 
-          '—'
+          { en: 'Saperavi', ka: 'საფერავი' }
         ],
         [
           { en: `${terrainIcon} Terrain`, ka: `${terrainIcon} რელიეფი` }, 
