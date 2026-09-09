@@ -85,7 +85,7 @@ table.zones th, .parcel-summary, .tip-head, .tip-outside, .fact-label {
   font-variant-caps: normal;
   font-feature-settings: normal;
   letter-spacing: .1em;
-  font-size: .6em;
+  font-size: .16px;
 }
 
 /* Everything applyCase() raises to upper case has to be on the face that has
@@ -335,11 +335,11 @@ h1.title {
 }
 .standfirst {
   font-family: var(--font);
-  font-size: clamp(18px, 2vw, 22px); font-weight: 400;
+  font-size: clamp(16px, 2vw, 18px); font-weight: 400;
   line-height: 1.45; color: var(--ink-soft); margin: 0 0 30px;
 }
 .byline {
-  font-size: 15px; color: var(--ink-soft); margin: 0 0 44px;
+  font-size: 16px; color: var(--ink-soft); margin: 0 0 44px;
   padding-top: 16px; border-top: 1px solid var(--rule);
 }
 .prose h2 {
