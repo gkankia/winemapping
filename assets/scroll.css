@@ -196,7 +196,11 @@
      a wide monitor. Still bounded by the picture's own edge, so it cannot
      overhang the map however large the screen gets. */
   width: clamp(340px, 31vw, 860px);
-  max-width: calc(100vw - var(--picture-edge, 70%) - 3rem);
+  /* Bounded by the share of the frame the card is standing in, which is the
+     picture's or the map's depending on where panelSide put it. applyPlateMask
+     works out which and writes it here; the 30% fallback is the picture's usual
+     share, for the moment before the script has run. */
+  max-width: calc(var(--panel-room, 30%) - 3rem);
   padding: clamp(24px, 1.9vw, 40px) clamp(26px, 2.1vw, 44px);
   background: var(--paper);
   border: 1px solid var(--rule-firm);
@@ -209,8 +213,9 @@
   border-top: 1px solid var(--rule); height: 0;
 }
 
-/* The panel sits over the photograph, so its corner follows the picture's side.
-   Set by buildStory() from the same value that shapes the mask. */
+/* Where the card stands in the frame. Set by buildStory() from panelSideFor(),
+   which is the card's own knob — it defaults to the picture's side, so a zone
+   that does not set `panelSide` still has its text over the photograph. */
 .chapter--right  { justify-content: flex-end;   align-items: center; }
 .chapter--left   { justify-content: flex-start; align-items: center; }
 .chapter--bottom { justify-content: center;     align-items: flex-end; padding-bottom: 10vh; }

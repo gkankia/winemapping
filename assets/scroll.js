@@ -502,14 +502,51 @@ function cameraPadding(z) {
     pad[side] += edge !== null ? Math.max(0, vh - edge / 100 * vh + clear) : fallback;
     pad[labelPlace(target)] += LABEL_ROOM;
   }
-  return fitToCanvas(pad, side, vw, vh);
+
+  // The card used to stand on the picture, which the padding above had already
+  // reserved, so it cost the camera nothing. It can stand anywhere now — and
+  // anywhere else means on the map, which is exactly where the zone has just
+  // been pushed. Reserve its footprint too, or the shape being described ends
+  // up underneath the card describing it.
+  const panelSide = panelSideFor(target);
+  const reserve = panelSide === side ? 0 : panelReserve(target, panelSide);
+  if (reserve) pad[panelSide] += reserve;
+
+  // Protected against fitToCanvas's give-back only when it is on `far` — the
+  // one side that function spends. Elsewhere it is on an axis fitToCanvas does
+  // not touch.
+  return fitToCanvas(pad, side, vw, vh, panelSide === far ? reserve : 0);
+}
+
+// px between the card's edge and the zone, so the shape does not begin exactly
+// where the card ends.
+const PANEL_CLEAR = 28;
+
+// The card's footprint on the axis it stands on. Measured rather than derived
+// from the clamp in the stylesheet: the width CSS settles on depends on
+// --panel-room, which depends on the seam, and rebuilding that arithmetic here
+// would be a second copy to keep in step. The clamp's own terms are the
+// fallback, for the first fit — before the chapters have been laid out, or
+// while a zone's card is display:none between language switches.
+function panelReserve(z, side) {
+  const chapter = z && document.getElementById(z.id);
+  const el = chapter && chapter.querySelector('.panel');
+  if (el) {
+    const box = el.getBoundingClientRect();
+    const size = isVerticalSeam(side) ? box.width : box.height;
+    if (size) return size + PANEL_CLEAR;
+  }
+  const guess = isVerticalSeam(side)
+    ? Math.min(860, Math.max(340, window.innerWidth * 0.31))
+    : window.innerHeight * 0.34;
+  return guess + PANEL_CLEAR;
 }
 
 // Give the band back its minimum: first out of the label's gutter, which is a
 // nicety, and only then out of the clearance, which is the thing protecting the
 // zone from the picture. Losing the gutter costs a well-placed name; losing the
 // clearance costs the zone, so they are spent in that order.
-function fitToCanvas(pad, side, vw, vh) {
+function fitToCanvas(pad, side, vw, vh, keep = 0) {
   const vertical = isVerticalSeam(side);
   const total = vertical ? vw : vh;
   const [a, b] = vertical ? ['left', 'right'] : ['top', 'bottom'];
@@ -518,7 +555,10 @@ function fitToCanvas(pad, side, vw, vh) {
   let band = total - pad[a] - pad[b];
   if (band >= MIN_BAND) return pad;
 
-  const spare = Math.max(0, pad[opposite] - FIT_INSET);
+  // `keep` is a card standing on this side. It is held back from the give-back
+  // for the same reason the clearance is: handing it over would put the zone
+  // under the card, which is the thing the reservation was for.
+  const spare = Math.max(0, pad[opposite] - FIT_INSET - keep);
   const give = Math.min(MIN_BAND - band, spare);
   pad[opposite] -= give;
   band += give;
@@ -602,7 +642,8 @@ function buildStory() {
 
     // The name is on the map now, beside the zone, so the panel does not
     // repeat it — it carries only what the map cannot say.
-    const side = sideFor(z);
+    // Placed from the card's own side, not the picture's: see PANEL_SIDE.
+    const side = panelSideFor(z);
     steps.push({ zone: z });
     return `<section class="chapter chapter--${side}" id="${z.id}">
       <div class="panel">
@@ -1695,11 +1736,22 @@ async function showParcels(z) {
 
    A zone can override the shape with `mask:` in its manifest entry.
    ─────────────────────────────────────────────────────────────────────── */
-// Which side of the frame the photograph occupies. Everything else follows from
-// it: the camera reserves that side, the panel sits over it, and the zone's name
-// goes to the far side of the zone, away from the picture.
+// Which side of the frame the photograph occupies. The camera reserves that
+// side, and the zone's name goes to the far side of the zone, away from the
+// picture.
 // A zone can override with `photoSide:` in its manifest entry.
 const PHOTO_SIDE = 'right';        // 'right' | 'left' | 'top' | 'bottom'
+
+// Where the text card stands, which used to be wherever the picture was — the
+// card was placed from sideFor(), so moving a photograph moved the text with
+// it and the two could not be composed against each other.
+//
+// They are separate now. Left unset the card still follows the picture, so a
+// zone that says nothing reads exactly as it did; `panelSide:` in a zone's
+// manifest entry moves it, and the camera follows the card rather than the
+// other way round — see cameraPadding(), which has to reserve the card's room
+// once it is no longer standing on the picture.
+const PANEL_SIDE = null;           // null = follow the picture; else a side
 
 // Portrait has no room for a side-by-side split, so the two horizontal layouts
 // fold onto the nearest vertical one.
@@ -1718,6 +1770,18 @@ const MASK_SHAPES = {
 
 function sideFor(z) {
   const want = sidePreview || (z && z.photoSide) || PHOTO_SIDE;
+  return window.matchMedia('(max-width: 720px)').matches
+    ? (MOBILE_SIDE[want] || 'bottom')
+    : want;
+}
+
+// Falls through to the picture's side when nothing asks otherwise. The mobile
+// fold is the same one the picture takes, so a card set opposite a photograph
+// stays opposite it in portrait — 'left' against 'right' becomes 'top' against
+// 'bottom' rather than both landing on the same edge.
+function panelSideFor(z) {
+  const want = (z && z.panelSide) || PANEL_SIDE;
+  if (!want) return sideFor(z);
   return window.matchMedia('(max-width: 720px)').matches
     ? (MOBILE_SIDE[want] || 'bottom')
     : want;
@@ -1862,8 +1926,17 @@ function applyPlateMask() {
     const raw = !isVerticalSeam(side) ? (side === 'top' ? 100 - reach.maxY : reach.minY)
               : side === 'left' ? 100 - reach.maxX
               : reach.minX;
+    // Whichever side the picture is on, this is the share the MAP keeps.
     const edge = Math.max(raw, (1 - PICTURE_MAX_SHARE) * 100);
     document.documentElement.style.setProperty('--picture-edge', edge.toFixed(2) + '%');
+
+    // The card is sized by the share it stands in — the picture's when it is
+    // over the photograph, the map's once it has been moved across. Sizing it
+    // against the picture either way would measure a card by the thing it was
+    // moved away from, and it would overhang. Only a left/right card reads
+    // this: a card at top or bottom is capped at 760px by the stylesheet.
+    const room = panelSideFor(current) === side ? 100 - edge : edge;
+    document.documentElement.style.setProperty('--panel-room', room.toFixed(2) + '%');
   }
 
   for (const el of plates) {
@@ -2271,6 +2344,13 @@ function goTo(i) {
   // only the highlighted shape changes.
   if (inset && inset.getSource('active')) inset.getSource('active').setData(z.fc);
 
+  // Before the fit, not after. This writes --panel-room, the card's width is
+  // bounded by it, and cameraPadding() measures that card to know how much of
+  // the frame to keep clear — so a mask applied afterwards would have the
+  // camera reserving room against the previous zone's seam. The zone may carry
+  // its own shape, so this has to re-run per zone rather than once.
+  applyPlateMask();
+
   if (!sameZone) {
     // cameraForBounds first, so the fit is known before the camera moves: the
     // offset that pushes the zone to the far edge depends on the zoom it lands
@@ -2310,7 +2390,6 @@ function goTo(i) {
       duration: reduced ? 0 : 900, essential: true
     });
   }
-  applyPlateMask();                      // the zone may carry its own shape
   if (photoWanted !== mediaOf(z)) showPhoto(mediaOf(z));
 
   const next = steps[i + 1];

@@ -42,19 +42,31 @@
       // both are set, so the still can stay as the fallback. Muted and looping;
       // under prefers-reduced-motion it holds its first frame instead of playing.
       // video: 'img/akhasheni.mp4',
-      // Optional. Adds a second chapter for this zone with a button that draws
-      // its vineyard parcels, fetched live from the NAPR register for the zone's
+      // Optional. Puts a button at the foot of this zone's card that draws its
+      // vineyard parcels, fetched live from the NAPR register for the zone's
       // own extent. No file to prepare — set it to true and the zone has parcels.
-  
+
       // Optional. Which side of the frame this zone's photograph takes:
-      // 'right' (the default), 'left', 'top' or 'bottom'. The panel, the camera
-      // and the zone's name all follow it. In portrait, right folds to bottom and
-      // left folds to top.
+      // 'right' (the default), 'left', 'top' or 'bottom'. The camera and the
+      // zone's name follow it. In portrait, right folds to bottom and left
+      // folds to top.
+      //
+      // Optional. `panelSide:` — where the text card stands, taking the same
+      // four values. Unset it follows the photograph, which is how every zone
+      // read before the two were separated; set it to compose the card against
+      // the picture instead of on top of it:
+      //
+      //     photoSide: 'right',   panelSide: 'left',
+      //
+      // The camera reserves the card's room wherever it lands, so the zone is
+      // not framed underneath it — which means a card moved off the picture
+      // costs the map some width, and a tight frame will zoom out to pay for it.
       // The mask above closes along the top edge, so the picture belongs there —
       // which puts the map in the band beneath it. 'left' with a top-shaped seam
       // left the camera reserving the wrong side of the frame.
       mask: 'M0,0 L0,42.00 C0.55,48.47 0.35,79.13 3.3,80.84 C6.25,82.55 5.98,59.16 17.69,52.24 C29.39,45.32 66.16,39.21 73.55,39.34 C80.93,39.46 59.61,53.83 62,53 C64.39,52.17 81.58,35.03 87.91,34.36 C94.25,33.7 97.99,46.56 100,49 L100,0 Z',
       photoSide: 'top',
+      panelSide: 'right',
       // How far down the band the zone is pushed, away from the picture. The
       // default (0.82) puts it near the foot of the frame, which under a
       // deep-reaching top seam reads as stranded; this brings it back up towards
