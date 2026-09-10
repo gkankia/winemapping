@@ -160,7 +160,7 @@
       // 'right' (the default), 'left', 'top' or 'bottom'. The panel, the camera
       // and the zone's name all follow it. In portrait, right folds to bottom and
       // left folds to top.
-      photoSide: 'left',
+      photoSide: 'right',
       // Optional. The shape of the seam between map and photograph for this zone,
       // as an SVG path in a 100x100 box (x right, y down). Filled area is photo.
       // Omit to use MASK_SHAPE, the default in scroll.js.
