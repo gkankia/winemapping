@@ -119,7 +119,10 @@
       // as an SVG path in a 100x100 box (x right, y down). Filled area is photo.
       // Omit to use MASK_SHAPE, the default in scroll.js.
       blurb: {
-        en: `One or two sentences. Delete the key to omit.`,
+        en: `The Akhoebi microzone is located within the administrative territory of Kardenakhi village in the Gurjaani Municipality, along the right bank of the Alazani River.
+        "Akhoebi" is a dark red dry wine with an impeccable character—full-bodied, extract-rich, velvety, and harmonious, featuring the distinct varietal aroma characteristic of this geographical area. 
+        Upon aging, it develops a pronounced bouquet with fruity notes. 
+        Grapes processing and winemaking are permitted only within the Kakheti zone, whereas bottling is allowed outside the Kakheti zone as well, provided it takes place within the territory of Georgia.`,
         ka: `ახოების მიკროზონა მდებაროებს გურჯაანის მუნიციპალიტეტის სოფელ კარდენახის ადმინისტრაციულ ტერიტორიაზე, მდინარე ალაზნის მარჯვენა სანაპიროზე. 
         "ახოები" მუქი შეფერილობის, წითელი მშრალი ღვინოა, უზადო, გემოზე სავსე, ექსტრაქტული, ხავერდოვანი, ჰარმონიული, ამ გეოგრაფიული არეალისთვის დამახასიათებელი ჯიშური არომატით. 
         დავარგებისას უვითარდება მკვეთრად გამოხატული ბუკეტი ხილის ტონებით. ყურძნის გადამუშავება და ღვინის დამზადება დასაშვებია მხოლოდ კახეთის ზონის ფარგლებში, ხოლო ჩამოსხმა კახეთის ზონის 
@@ -151,34 +154,46 @@
       // Optional. Adds a second chapter for this zone with a button that draws
       // its vineyard parcels, fetched live from the NAPR register for the zone's
       // own extent. No file to prepare — set it to true and the zone has parcels.
-      parcels: true,
-      parcelNote: {
-        en: 'One or two sentences on the parcels here — how many holdings, '
-          + 'what is planted, how far back the plantings go.',
-        ka: 'ერთი-ორი წინადადება აქაურ ნაკვეთებზე — რამდენი მეურნეობაა, '
-          + 'რა არის დარგული, რამდენად ძველია ნარგავები.'
-      },
+      
+
       // Optional. Which side of the frame this zone's photograph takes:
       // 'right' (the default), 'left', 'top' or 'bottom'. The panel, the camera
       // and the zone's name all follow it. In portrait, right folds to bottom and
       // left folds to top.
-      mask: 'M100,0 L30.42,0 C36.29,11.81 58.77,58.5 65.67,70.86 C72.57,83.21 72.62,72.35 71.83,74.14 C71.04,75.93 65.07,83.64 60.93,81.61 C56.79,79.59 47.82,62.6 47,62 C46.18,61.4 55.33,71.67 56,78 C56.67,84.33 51.83,96.33 51,100 L100,100 Z',
-      photoSide: 'right',
+      photoSide: 'left',
       // Optional. The shape of the seam between map and photograph for this zone,
       // as an SVG path in a 100x100 box (x right, y down). Filled area is photo.
       // Omit to use MASK_SHAPE, the default in scroll.js.
       blurb: {
-        en: 'One or two sentences. Delete the key to omit.',
-        ka: 'ერთი-ორი წინადადება. წაშალეთ გასაღები, თუ არ გჭირდებათ.'
+        en: `The Gurjaani microzone is located along the middle reaches of the Alazani River, on its right bank. 
+        It encompasses the foothills bordering the forested slopes of the northeastern incline of the Tsiv-Gombori Ridge, as well as the Alazani Plain stretching to the Alazani Canal.
+        "Gurjaani" is a white, light straw-colored dry wine with an impeccable, delicate, soft, and refined aroma and taste, featuring a characteristic varietal aroma and notes of field flowers. 
+        This wine can be produced exclusively from the Rkatsiteli grape variety grown within this micro-zone, though up to 15% of Kakhuri Mtsvane grapes grown in the same micro-zone may also be used in its production.
+        The wine "Gurjaani" has been produced since 1887.`,
+        ka: `გურჯაანის მიკროზონა მდებარეობს მდინარე ალაზნის შუა წელში, მარჯვენა სანაპიროზე და მოიცავს ცივ-გომბორის ქედის
+        ჩრდილო-აღმოსავლეთი დაქანების ტყიან კალთებზე მიბჯენილ მთისწინებს და ალაზნის დაბლობს ალაზნის არხამდე.
+        "გურჯაანი" თეთრი, ღია ჩალისფერი მშრალი ღვინოა, ხოლო არომატი და გემო უზადო, ნაზი, რბილი, დახვეწილი, დამახასიათებელი ჯიშური არომატით,
+        მინდვრის ყვავილების ტონებით. ეს ღვინო შეიძლება დამზადდეს მხოლოდ ამ მიკროზონაში მოყვანილი რქაწითელის ჯიშის ყურძნიდან.
+        მის დასამზადებლად, დასაშვებია 15%-მდე, იმავე მიკროზონაში მოყვანილი კახური მწვანე ჯიშის ყურძნის გამოყენებაც. 
+        ღვინო "გურჯაანი" მზადდება 1887 წლიდან.`
       },
       // [label, value] — any number, two per row. Either half may be a
       // { en, ka } object; a bare string is used in both languages.
       facts: [
-        [{ en: 'Grapes', ka: 'ჯიშები' }, '—'],
-        [{ en: 'Style',  ka: 'სტილი'  }, '—'],
-        [{ en: 'Region', ka: 'რეგიონი' }, '—'],
-        [{ en: 'Vines',  ka: 'ვაზები' }, '—']
-      ]
+        [
+          { en: `${grapeIcon} Vine`, ka: `${grapeIcon} ვაზი` }, 
+          { en: 'Rkatsiteli / Kakhuri Mtsvane', ka: 'რქაწითელი / კახური მწვანი' }
+        ],
+        [
+          { en: `${terrainIcon} Terrain`, ka: `${terrainIcon} რელიეფი` }, 
+          { en: '350-700 meters A.S.L', ka: '350-700 მეტრი ზღვის დონიდან' }
+        ]
+      ],
+      parcels: true,
+      parcelNote: {
+        en: '',
+        ka: ''
+      }
     },
     {
       name:   'Vazisubani',              // heading
