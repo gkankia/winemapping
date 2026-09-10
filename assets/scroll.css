@@ -245,18 +245,15 @@
   padding: 16px 18px;
   display: grid; grid-template-columns: 1fr 1fr; gap: 14px 20px;
 }
-/* Well under the value it stands on, so the row is read value-first and the
-   label is the caption on it. At 15px the two were close enough to compete. */
-.fact-label { font-size: 13px; color: var(--ink-soft); margin-bottom: 1px; }
-/* In px for the same reason .eyebrow and .figcaption are: the shared caption
-   rule in site.css sizes the Georgian side at .8em, and that em is the PARENT's
-   size — .facts inherits 17px from the panel, so Georgian would land at 13.6px,
-   larger than the 13px Latin beside it. A label this small only wants the
-   little that mtavruli's extra width asks for. */
-.fact-label:lang(ka) { font-size: 12px; }
+.fact-label { font-size: 15px; color: var(--ink-soft); margin-bottom: 1px; }
+/* The size of the running text, on purpose: a fact is a line to read, not a
+   number to be struck by. Weight and colour are what set it off the label now,
+   which is enough at this distance. It was clamp(21px, 1.25vw, 26px), and that
+   middle term never bit — 1.25vw only passes the 21px floor above a 1680px
+   window, so on any ordinary screen the clamp resolved to a flat 21px. */
 .fact-value {
   font-family: var(--font-body);
-  font-size: clamp(21px, 1.25vw, 26px); font-weight: 600; line-height: 1.15; color: var(--russet);
+  font-size: var(--fs-text); font-weight: 600; line-height: 1.15; color: var(--russet);
 }
 /* Shown only when a seam has been handed over from the studio. */
 #seam-preview-flag {
@@ -268,8 +265,11 @@
 }
 
 /* ─── parcel controls, inside a chapter panel ────────────────────────── */
+/* The 4px was the gap under a blurb, which carries 22px of its own. The button
+   sits under the facts box now, and that has no bottom margin, so the air it
+   used to inherit has to be stated. */
 .parcel-toggle {
-  display: block; width: 100%; margin: 4px 0 0;
+  display: block; width: 100%; margin: 18px 0 0;
   padding: 10px 16px; cursor: pointer;
   background: var(--paper-deep);
   border: 1px solid var(--rule-firm);

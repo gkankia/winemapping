@@ -578,48 +578,51 @@ function init(results) {
 
 const emptyFC = () => ({ type: 'FeatureCollection', features: [] });
 
-// Each zone contributes one chapter, and a second one if it has parcel data.
-// The flat list is what scrollama indexes into.
+// One chapter per zone. The flat list is what scrollama indexes into.
 let steps = [];
 
 function buildStory() {
   steps = [];
-  const html = zones.map((z, i) => {
+  const html = zones.map(z => {
     const facts = (z.facts || []).map(([label, value]) => `
       <div>
         <div class="fact-label">${pick(label)}</div>
         <div class="fact-value">${pick(value)}</div>
       </div>`).join('');
 
+    // The parcels used to have a chapter of their own, which meant the reader
+    // scrolled away from the zone's own card to turn the layer on. The button
+    // lives under the facts instead, and the legend opens in place beneath it,
+    // so the layer goes on without leaving the card that describes the zone.
+    const parcels = z.parcels ? `
+        <button type="button" class="parcel-toggle" data-zone="${z.id}" aria-pressed="false">
+          <span class="parcel-toggle-label">${t('parcels.show')}</span>
+        </button>
+        <div class="parcel-legend" id="legend-${z.id}" hidden></div>` : '';
+
     // The name is on the map now, beside the zone, so the panel does not
     // repeat it — it carries only what the map cannot say.
     const side = sideFor(z);
-    steps.push({ zone: z, role: 'zone' });
-    let out = `<section class="chapter chapter--${side}" id="${z.id}">
+    steps.push({ zone: z });
+    return `<section class="chapter chapter--${side}" id="${z.id}">
       <div class="panel">
         ${pick(z.blurb) ? `<p class="blurb">${pick(z.blurb)}</p>` : ''}
         ${facts ? `<div class="facts">${facts}</div>` : ''}
+        ${parcels}
       </div>
     </section>`;
-
-    if (z.parcels) {
-      steps.push({ zone: z, role: 'parcels' });
-      out += `<section class="chapter chapter--${side}" id="${z.id}-parcels">
-        <div class="panel">
-          <div class="eyebrow">${t('chapter.parcels')}</div>
-          <p class="blurb">${pick(z.parcelNote) || t('parcels.default')}</p>
-          <button type="button" class="parcel-toggle" data-zone="${z.id}" aria-pressed="false">
-            <span class="parcel-toggle-label">${t('parcels.show')}</span>
-          </button>
-          <div class="parcel-legend" id="legend-${z.id}" hidden></div>
-        </div>
-      </section>`;
-    }
-    return out;
   }).join('');
 
   const story = document.getElementById('story');
   story.innerHTML = html + '<div id="tail"></div>';
+
+  // Whoever writes the markup raises its case — the same contract renderLegend
+  // keeps. It has to be here rather than at the call sites: the chapters are
+  // written once the zone shapes have arrived, which is after i18n's own `load`
+  // pass has already been and gone, so nothing else would ever uppercase them.
+  // Only the language switch used to, via rebuildStory, which is why a fact
+  // label came up upper case after a switch and lower case on a plain refresh.
+  applyCase(story);
 
   // #story itself survives a rebuild — only its contents are replaced — so the
   // delegated listener is attached once. Re-attaching per build stacked a second
@@ -1572,10 +1575,10 @@ function setParcelVisibility(z, visible) {
   }
 }
 
-// Parcels belong to their own chapter. Scrolling away — up to the zone, or on
-// to the next one — puts the map back to how it was, so the layer is something
-// the reader turns on rather than something that follows them around. The data
-// stays cached, so turning it back on is instant.
+// Parcels belong to the zone whose card turned them on. Scrolling to any other
+// zone puts the map back to how it was, so the layer is something the reader
+// turns on rather than something that follows them around. The data stays
+// cached, so turning it back on is instant.
 function hideParcels(except) {
   for (const z of zones) {
     if (z === except) continue;
@@ -1616,6 +1619,16 @@ function toggleParcels(zoneId) {
     if (el) el.hidden = true;
     hideTip();
     syncToggle(z);
+    // The button is now the only thing that turns the layer on, so it is also
+    // the only thing that can hand the map back. Turning the parcels off with
+    // a camera the reader dragged puts the zone back in its frame.
+    setMapInteractive(false);
+    if (current === z) {
+      map.fitBounds(cameraBox(z), {
+        padding: cameraPadding(z), maxZoom: MAX_ZOOM,
+        duration: reduced ? 0 : 900, essential: true
+      });
+    }
     return;
   }
   showParcels(z);
@@ -1633,6 +1646,7 @@ async function showParcels(z) {
     const el = document.getElementById('legend-' + z.id);
     if (el) el.hidden = false;
     syncToggle(z);
+    setMapInteractive(true);
     return;
   }
 
@@ -1656,6 +1670,7 @@ async function showParcels(z) {
     st.loaded = true; st.visible = true;
     renderLegend(z, st.legend);
     syncToggle(z);
+    setMapInteractive(true);
   } catch (err) {
     console.warn('parcels failed for ' + z.name, err);
     st.failed = true;                 // a failed sweep is not retried on every scroll
@@ -2238,15 +2253,15 @@ function goTo(i) {
   const z = step.zone;
   const sameZone = current === z;
   current = z;
-  // Nothing about the zone itself changes when moving to its parcel chapter, so
-  // the label is left alone rather than re-run — rebuilding it would flash for
-  // no reason. The photograph is handled below: it leaves for the parcels.
+  // Now that a zone has one step, this only guards the step re-firing on the
+  // same zone — but the guard still earns its place: rebuilding the label would
+  // flash it for a zone that has not changed.
   if (!sameZone) showLabel(z);
 
-  // Entering a zone's parcel chapter keeps the camera where it is; only the
-  // panel changes, so the reader's eye is not thrown by a move they did not ask
-  // for. Anywhere else, every parcel layer comes off the map.
-  hideParcels(step.role === 'parcels' ? z : null);
+  // This zone's parcels stay; every other zone's come off the map. The layer is
+  // turned on from inside this card now, so arriving at the card — or the step
+  // simply re-firing — must not take away what the reader just asked for.
+  hideParcels(z);
 
 
   showPatch(z);
@@ -2279,32 +2294,24 @@ function goTo(i) {
     }
   }
 
-  // Scrolling back up from the parcels to the zone is a same-zone move, so the
-  // photograph has to be restored on the flag rather than on the zone changing.
-  if (step.role === 'parcels') {
-    // The photograph stays. It used to leave, on the argument that the parcel
-    // chapter is about reading the ground — but the camera does not move
-    // between a zone and its parcels, so the picture leaving was the only thing
-    // that changed, and the frame lurched for a chapter that is meant to be the
-    // same view with more drawn on it.
-    applyPlateMask();
-    if (photoWanted !== mediaOf(z)) showPhoto(mediaOf(z));
-    setMapInteractive(true);
-  } else {
-    // Leaving the parcels for the same zone's own chapter skips the fit above,
-    // so a camera the reader has dragged would simply stay dragged. Put the
-    // zone back in its frame.
-    const wasFree = mapInteractive;
-    setMapInteractive(false);
-    if (wasFree && sameZone) {
-      map.fitBounds(cameraBox(z), {
-        padding: cameraPadding(z), maxZoom: MAX_ZOOM,
-        duration: reduced ? 0 : 900, essential: true
-      });
-    }
-    applyPlateMask();                    // the zone may carry its own shape
-    if (photoWanted !== mediaOf(z)) showPhoto(mediaOf(z));
+  // Dragging the map is what reading parcels needs, and there is no parcel
+  // chapter to hang that on any more — so it follows the layer itself: free
+  // while the parcels are showing, locked otherwise, so a scroll over a zone
+  // with nothing drawn on it is never eaten by the map.
+  const parcelsOn = !!(parcelState[z.id] && parcelState[z.id].visible);
+  const wasFree = mapInteractive;
+  setMapInteractive(parcelsOn);
+  // A camera the reader dragged stays dragged unless the fit above ran, so put
+  // the zone back in its frame when they arrive with the parcels off. Never
+  // while they are on: the view is theirs to hold for as long as it is.
+  if (wasFree && !parcelsOn && sameZone) {
+    map.fitBounds(cameraBox(z), {
+      padding: cameraPadding(z), maxZoom: MAX_ZOOM,
+      duration: reduced ? 0 : 900, essential: true
+    });
   }
+  applyPlateMask();                      // the zone may carry its own shape
+  if (photoWanted !== mediaOf(z)) showPhoto(mediaOf(z));
 
   const next = steps[i + 1];
   preload(next && next.zone !== z && mediaOf(next.zone));
@@ -2327,9 +2334,8 @@ function attachScroller() {
 // Rebuild the text without losing the scroll wiring or the reader's place.
 function rebuildStory() {
   const at = current;
-  buildStory();
+  buildStory();                // raises its own case now
   attachScroller();
-  applyCase();                 // the chapters were just replaced
   if (at) {
     showLabel(at);
     const st = parcelState[at.id];
