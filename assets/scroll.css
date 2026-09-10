@@ -229,10 +229,15 @@
 /* Repeated here for the same reason as in site.css: the :lang rule there is
    more specific than a bare class, whichever file comes last. */
 .panel .eyebrow:lang(ka) { font-size: clamp(17px, 1.15vw, 22px); }
+/* The same running text as the article column, so it reads off the same three
+   tokens in site.css rather than carrying its own size and colour. It used to
+   be clamp(17px, 1.05vw, 21px) in --ink: on an ordinary window the clamp sat on
+   its 17px floor and only the colour showed as a difference, which made the
+   panels read a shade heavier than the prose for no reason anyone chose. */
 .blurb {
   font-family: var(--font-body);
-  font-size: clamp(17px, 1.05vw, 21px); line-height: 1.6;
-  margin: 0 0 22px; color: var(--ink);
+  font-size: var(--fs-text); line-height: var(--lh-text);
+  margin: 0 0 22px; color: var(--ink-text);
 }
 .facts {
   background: var(--paper-deep);
@@ -240,7 +245,15 @@
   padding: 16px 18px;
   display: grid; grid-template-columns: 1fr 1fr; gap: 14px 20px;
 }
-.fact-label { font-size: 15px; color: var(--ink-soft); margin-bottom: 1px; }
+/* Well under the value it stands on, so the row is read value-first and the
+   label is the caption on it. At 15px the two were close enough to compete. */
+.fact-label { font-size: 13px; color: var(--ink-soft); margin-bottom: 1px; }
+/* In px for the same reason .eyebrow and .figcaption are: the shared caption
+   rule in site.css sizes the Georgian side at .8em, and that em is the PARENT's
+   size — .facts inherits 17px from the panel, so Georgian would land at 13.6px,
+   larger than the 13px Latin beside it. A label this small only wants the
+   little that mtavruli's extra width asks for. */
+.fact-label:lang(ka) { font-size: 12px; }
 .fact-value {
   font-family: var(--font-body);
   font-size: clamp(21px, 1.25vw, 26px); font-weight: 600; line-height: 1.15; color: var(--russet);

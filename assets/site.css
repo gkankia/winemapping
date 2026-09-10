@@ -50,6 +50,15 @@
   --font-body:  'BPG Paata', var(--font);    /* running text */
   --font-label: 'GL Kupiura', var(--font);   /* zone names on the map */
 
+  /* Running text, wherever it appears. The article column and the panels that
+     scroll over the map are the same voice at the same distance from the
+     reader, so both take their size, leading and colour from here rather than
+     each stylesheet setting its own — which is how they drifted apart. Change
+     these three and both change together. */
+  --fs-text:  17px;
+  --lh-text:  1.66;          /* Paata sits taller than Google Sans */
+  --ink-text: var(--ink-soft);
+
   --column: 640px;
   --wide:   1140px;
 }
@@ -59,7 +68,7 @@ html { scroll-behavior: smooth; }
 
 body {
   margin: 0;
-  color: var(--ink-soft);
+  color: var(--ink-text);
   background-color: var(--paper);
   /* The grain is drawn, not photographed: a fine turbulence field at low
      opacity, plus a warm wash that darkens toward the edges the way a page does
@@ -69,8 +78,8 @@ body {
     radial-gradient(100% 120% at 100% 100%, rgba(154,126,74,.14) 0%, rgba(154,126,74,0) 55%),
     url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23g)' opacity='0.055'/%3E%3C/svg%3E");
   font-family: var(--font-body);
-  font-size: 17px;
-  line-height: 1.66;   /* Paata sits taller than Google Sans */
+  font-size: var(--fs-text);
+  line-height: var(--lh-text);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -534,7 +543,9 @@ table.zones td.num { font-variant-numeric: tabular-nums; color: var(--ink-soft);
 .site-foot-in .spacer { margin-left: auto; }
 
 @media (max-width: 720px) {
-  body { font-size: 16px; }
+  /* On the token rather than on body, so the panels come down with the article
+     instead of staying at the desktop size on a phone. */
+  :root { --fs-text: 16px; }
   .lede { padding-top: 46px; }
   .site-nav { gap: 14px; }
 }
